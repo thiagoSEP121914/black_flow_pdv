@@ -36,6 +36,8 @@ model User {
   store     Store?   @relation(fields: [storeId], references: [id])
   role      String?  // 'cashier' | 'manager' | 'supervisor' | etc.
 
+  sessions        Session[] // Um usuário pode ter múltiplas sessões (refresh tokens) ativas.
+
   sales     Sale[]
   cashiers  Cashier[]
 
@@ -43,6 +45,27 @@ model User {
   @@index([userType])
   @@index([companyId])
   @@index([storeId])
+}
+
+model Session {
+  id            String    @id @default(auto()) @db.ObjectId @map("_id")
+  // Armazena o Refresh Token assinado. 
+  // Usamos @unique para garantir que cada token seja único no DB.
+  token         String    @unique
+  
+  userId        String    @db.ObjectId
+  user          User      @relation(fields: [userId], references: [id])
+  
+  // A data em que o token deve ser considerado inválido.
+  expiresAt     DateTime  
+  createdAt     DateTime  @default(now())
+  
+  // Detalhes da sessão (Útil para mostrar ao usuário onde ele está logado)
+  userAgent     String?   // Ex: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+  ipAddress     String?   // O endereço IP de onde o login foi feito
+  
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Company {

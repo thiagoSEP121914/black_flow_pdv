@@ -5,7 +5,7 @@ import unauthRouter from "./routes/unauthRouter.js";
 config();
 const server = express();
 const PORT = 8080;
-
+server.use(express.json());
 server.get("/", (req, res) => {
     res.json("Hello world");
 });

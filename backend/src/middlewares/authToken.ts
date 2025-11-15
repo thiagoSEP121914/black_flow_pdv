@@ -1,4 +1,3 @@
-// authToken.ts
 import { Request, Response, NextFunction } from "express";
 import jwt, { SignOptions } from "jsonwebtoken";
 
@@ -12,7 +11,7 @@ export interface AccessTokenPayload {
 }
 
 export interface RefreshTokenPayload {
-    id: number;
+    id: string;
 }
 
 function getAccessSecret(): string {
@@ -40,7 +39,6 @@ export function generateRefreshToken(payload: RefreshTokenPayload) {
     } as SignOptions);
 }
 
-// ----- MIDDLEWARE DE AUTENTICAÇÃO -----
 export function authenticateToken(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers["authorization"];
     const token = authHeader?.split(" ")[1];
@@ -49,7 +47,7 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
 
     try {
         const user = jwt.verify(token, getAccessSecret()) as AccessTokenPayload;
-        (req as any).user = user; // você pode tipar melhor se quiser
+        (req as any).user = user;
         next();
     } catch (err) {
         return res.status(403).json({ error: "Token inválido ou expirado" });

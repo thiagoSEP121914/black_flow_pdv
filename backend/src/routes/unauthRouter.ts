@@ -10,7 +10,7 @@ export class UnauthRouter {
     }
 
     private routes() {
-        this.router.use("/login", loginController);
+        this.router.use("/unauth", loginController);
     }
 }
 

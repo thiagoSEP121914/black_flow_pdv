@@ -2,8 +2,10 @@ import prisma from "./core/prisma.js";
 import bcrypt from "bcryptjs";
 
 async function main() {
-    const hashedPassword = await bcrypt.hash("123456", 10);
+    const hashedPasswordOperator = await bcrypt.hash("123456", 10);
+    const hashedPasswordOwner = await bcrypt.hash("owner123", 10);
 
+    // Cria empresa
     const company = await prisma.company.create({
         data: {
             name: "Minha Empresa",
@@ -11,6 +13,7 @@ async function main() {
         },
     });
 
+    // Cria loja
     const store = await prisma.store.create({
         data: {
             name: "Loja Principal",
@@ -19,10 +22,11 @@ async function main() {
         },
     });
 
-    const user = await prisma.user.create({
+    // Usuário operador
+    const operator = await prisma.user.create({
         data: {
             email: "operator@example.com",
-            password: hashedPassword,
+            password: hashedPasswordOperator,
             name: "Operador Teste",
             userType: "operator",
             companyId: company.id,
@@ -32,7 +36,21 @@ async function main() {
         },
     });
 
-    console.log("Seed concluído:", user);
+    // Usuário owner
+    const owner = await prisma.user.create({
+        data: {
+            email: "owner@example.com",
+            password: hashedPasswordOwner,
+            name: "Dono da Empresa",
+            userType: "owner",
+            companyId: company.id,
+            active: true,
+        },
+    });
+
+    console.log("Seed concluído:");
+    console.log("Operator:", operator);
+    console.log("Owner:", owner);
 }
 
 main()
