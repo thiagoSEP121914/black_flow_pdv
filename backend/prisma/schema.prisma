@@ -110,33 +110,40 @@ model Category {
 
   @@index([name])
 }
+// ... (Model Category permanece inalterado)
 
 model Product {
-  id          String   @id @default(auto()) @db.ObjectId @map("_id")
-  name        String
-  description String?
-  costPrice   Float?      
-  salePrice   Float       
-  barcode     String?     
-  active      Boolean  @default(true)
-  quantity    Int      @default(0)
-  minStock    Int?
-  location    String?
-  image       String?  // caminho/URL da imagem do produto
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String   @id @default(auto()) @db.ObjectId @map("_id")
+  name        String
+  description String?
+  costPrice   Float?      
+  salePrice   Float       
+  barcode     String?     
+  active      Boolean  @default(true)
+  quantity    Int      @default(0)
+  minStock    Int?
+  location    String?
+  image       String?  // caminho/URL da imagem do produto
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  categoryId String?   @db.ObjectId
-  category   Category? @relation(fields: [categoryId], references: [id])
+  // 1. CHAVE E RELAÇÃO (Referência para integridade)
+  categoryId String?   @db.ObjectId
+  category   Category? @relation(fields: [categoryId], references: [id])
+  
+  // 2. ✅ CAMPOS INCORPORADOS (Otimização para leitura no MongoDB)
+  categoryName   String? // Nome da categoria para consultas rápidas
+  categoryActive Boolean @default(true) // Status da categoria no momento da criação/atualização
+  
+  storeId String   @db.ObjectId
+  store   Store    @relation(fields: [storeId], references: [id])
 
-  storeId String   @db.ObjectId
-  store   Store    @relation(fields: [storeId], references: [id])
+  saleItems SaleItem[]
 
-  saleItems SaleItem[]
-
-  @@index([categoryId])
-  @@index([active])
-  @@index([storeId])
+  @@index([categoryId])
+  @@index([active])
+  @@index([storeId])
+  @@index([categoryName]) // Opcional: para busca por nome de categoria
 }
 
 model Cashier {

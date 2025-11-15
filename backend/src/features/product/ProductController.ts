@@ -20,10 +20,7 @@ export class ProductController extends Controller {
     }
 
     handle(): Router {
-        /**
-         * Criar um novo produto
-         * Requer 'storeId' no corpo
-         */
+    
         this.route.post("/", async (req: Request, res: Response) => {
             try {
                 const { companyId } = (req as AuthenticateRequest).user;
@@ -103,28 +100,30 @@ export class ProductController extends Controller {
                 return res.status(500).json({ error: error.message });
             }
         });
-
-        /**
-         * Atualizar um produto
-         * Requer 'storeId' na query string (?storeId=...)
-         */
         this.route.put("/:id", async (req: Request, res: Response) => {
             try {
                 const { companyId } = (req as AuthenticateRequest).user;
                 const storeId = req.query.storeId as string;
                 const { id } = req.params;
-                const data = req.body as UpdateProductDTO;
+
+                // 🛑 CORREÇÃO APLICADA AQUI:
+                // Destrutura para garantir que storeId não seja passado no objeto data,
+                // prevenindo que o Prisma tente atualizar o campo de escopo (storeId)
+                const { storeId: storeIdFromRequestBody, ...data } = req.body as UpdateProductDTO & {
+                    storeId?: string;
+                };
 
                 if (!storeId) {
                     return res.status(400).json({ error: "storeId query parameter is required" });
                 }
 
-                // Checagem de segurança
+                // Checagem de segurança (mantida)
                 const hasAccess = await this.checkStoreAccess(companyId, storeId);
                 if (!hasAccess) {
                     return res.status(403).json({ error: "Access denied to this store" });
                 }
 
+                // Passamos o storeId da QUERY como parâmetro de escopo
                 const product = await productService.updateProduct(id, storeId, data);
                 return res.json(product);
             } catch (err) {
@@ -134,11 +133,7 @@ export class ProductController extends Controller {
                 return res.status(error.message.includes("not found") ? 404 : 400).json({ error: error.message });
             }
         });
-
-        /**
-         * Desativar um produto
-         * Requer 'storeId' na query string (?storeId=...)
-         */
+       
         this.route.delete("/:id", async (req: Request, res: Response) => {
             try {
                 const { companyId } = (req as AuthenticateRequest).user;
