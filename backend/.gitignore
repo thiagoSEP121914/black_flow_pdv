@@ -57,3 +57,5 @@ logs/*.log
 # ─────────────────────────────
 tmp/
 temp/
+
+/src/generated/prisma

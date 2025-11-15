@@ -1,0 +1,236 @@
+// ---------------------------------------------------------
+//  Datasource & Generator
+// ---------------------------------------------------------
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------
+//  MODELS — POS SYSTEM (Single Tenant) - IMPROVED
+// ---------------------------------------------------------
+
+// Tabela unificada de usuários para login
+model User {
+  id        String   @id @default(auto()) @db.ObjectId @map("_id")
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Tipo de usuário: 'owner' ou 'operator'
+  userType  String   // 'owner' | 'operator'
+  
+  // Se for OWNER
+  companyId String?  @db.ObjectId
+  company   Company? @relation(fields: [companyId], references: [id])
+  
+  // Se for OPERATOR
+  storeId   String?  @db.ObjectId
+  store     Store?   @relation(fields: [storeId], references: [id])
+  role      String?  // 'cashier' | 'manager' | 'supervisor' | etc.
+
+  // Relações
+  sales     Sale[]
+  cashiers  Cashier[]
+
+  @@index([userType])
+  @@index([companyId])
+  @@index([storeId])
+}
+
+model Company {
+  id        String   @id @default(auto()) @db.ObjectId @map("_id")
+  name      String
+  cnpj      String?  @unique
+  phone     String?
+  email     String?
+  address   String?
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stores         Store[]
+  users          User[]      // Owners da empresa
+  financialItems Financial[]
+
+  @@index([status])
+}
+
+model Store {
+  id        String   @id @default(auto()) @db.ObjectId @map("_id")
+  name      String
+  cnpj      String?
+  phone     String?
+  email     String?
+  address   String?
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId String   @db.ObjectId
+  company   Company  @relation(fields: [companyId], references: [id])
+
+  users    User[]    // Operators da loja
+  cashiers Cashier[]
+  sales    Sale[]
+
+  @@index([companyId])
+  @@index([status])
+}
+
+model Category {
+  id          String   @id @default(auto()) @db.ObjectId @map("_id")
+  name        String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  products Product[]
+
+  @@index([name])
+}
+
+model Product {
+  id          String   @id @default(auto()) @db.ObjectId @map("_id")
+  name        String
+  description String?
+  price       Float
+  barcode     String?  @unique
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categoryId String?   @db.ObjectId
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  stock     Stock?
+  saleItems SaleItem[]
+
+  @@index([categoryId])
+  @@index([active])
+}
+
+model Stock {
+  id        String   @id @default(auto()) @db.ObjectId @map("_id")
+  productId String   @unique @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id])
+
+  quantity  Int
+  minStock  Int?     // Estoque mínimo para alerta
+  location  String?
+  updatedAt DateTime @updatedAt
+}
+
+model Cashier {
+  id            String    @id @default(auto()) @db.ObjectId @map("_id")
+  storeId       String    @db.ObjectId
+  userId        String    @db.ObjectId
+  
+  openingAmount Float
+  closingAmount Float?
+  openedAt      DateTime  @default(now())
+  closedAt      DateTime?
+  status        String    // 'open' | 'closed'
+
+  store Store @relation(fields: [storeId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([storeId])
+  @@index([userId])
+  @@index([status])
+}
+
+model Sale {
+  id            String   @id @default(auto()) @db.ObjectId @map("_id")
+  date          DateTime @default(now())
+  total         Float
+  discount      Float    @default(0)
+  paymentMethod String   // 'cash' | 'credit' | 'debit' | 'pix'
+  status        String   @default("completed") // 'completed' | 'cancelled'
+
+  userId     String   @db.ObjectId
+  storeId    String   @db.ObjectId
+  customerId String?  @db.ObjectId
+
+  user     User      @relation(fields: [userId], references: [id])
+  store    Store     @relation(fields: [storeId], references: [id])
+  customer Customer? @relation(fields: [customerId], references: [id])
+
+  items SaleItem[]
+
+  @@index([userId])
+  @@index([storeId])
+  @@index([customerId])
+  @@index([date])
+  @@index([status])
+}
+
+model SaleItem {
+  id        String @id @default(auto()) @db.ObjectId @map("_id")
+  quantity  Int
+  unitPrice Float
+  subtotal  Float  // quantity * unitPrice
+
+  saleId    String @db.ObjectId
+  productId String @db.ObjectId
+
+  sale    Sale    @relation(fields: [saleId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([saleId])
+  @@index([productId])
+}
+
+model Customer {
+  id        String   @id @default(auto()) @db.ObjectId @map("_id")
+  name      String
+  email     String?
+  phone     String?
+  cpf       String?  @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  sales Sale[]
+
+  @@index([phone])
+}
+
+model Financial {
+  id          String   @id @default(auto()) @db.ObjectId @map("_id")
+  type        String   // 'income' | 'expense'
+  category    String   // 'sale' | 'purchase' | 'salary' | etc.
+  amount      Float
+  date        DateTime @default(now())
+  description String?
+
+  companyId String  @db.ObjectId
+  company   Company @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([type])
+  @@index([date])
+}
+
+// Tabela para gerenciar permissões e módulos por role
+model Permission {
+  id          String   @id @default(auto()) @db.ObjectId @map("_id")
+  role        String   // 'owner' | 'manager' | 'cashier' | etc.
+  module      String   // 'sales' | 'products' | 'reports' | 'users' | etc.
+  canView     Boolean  @default(false)
+  canCreate   Boolean  @default(false)
+  canEdit     Boolean  @default(false)
+  canDelete   Boolean  @default(false)
+  description String?
+
+  @@unique([role, module], map: "role_module")
+  @@index([role])
+  @@index([module])
+}
