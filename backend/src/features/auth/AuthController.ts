@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { AuthService } from "./AuthService.js"; // A classe que criamos
+import { AuthService } from "./AuthService.js";
 import { Controller } from "../../core/Controller.js";
 
 interface SignupDTO {
@@ -14,15 +14,18 @@ interface LoginDTO {
     password: string;
 }
 
+const authService = new AuthService();
+
 export class AuthController extends Controller {
     private authService = new AuthService();
 
     handle() {
-        // ------------------- SIGNUP OWNER -------------------
+        // ------------------ SIGNUP ------------------
         this.route.post("/signup", async (req: Request, res: Response) => {
             try {
                 const data = req.body as SignupDTO;
                 const result = await this.authService.signupOwner(data);
+
                 return res.status(201).json({
                     message: "Owner account created",
                     company: result.company,
@@ -39,7 +42,7 @@ export class AuthController extends Controller {
             }
         });
 
-        // ------------------- LOGIN -------------------
+        // ------------------ LOGIN ------------------
         this.route.post("/login", async (req: Request, res: Response) => {
             try {
                 const data = req.body as LoginDTO;
@@ -51,7 +54,7 @@ export class AuthController extends Controller {
             }
         });
 
-        // ------------------- REFRESH TOKEN -------------------
+        // ------------------ REFRESH ------------------
         this.route.post("/refresh", async (req: Request, res: Response) => {
             try {
                 const { refreshToken } = req.body;
@@ -65,7 +68,7 @@ export class AuthController extends Controller {
             }
         });
 
-        // ------------------- LOGOUT -------------------
+        // ------------------ LOGOUT ------------------
         this.route.post("/logout", async (req: Request, res: Response) => {
             try {
                 const { refreshToken } = req.body;

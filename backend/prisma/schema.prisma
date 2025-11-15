@@ -11,10 +11,9 @@ datasource db {
 }
 
 // ---------------------------------------------------------
-//  MODELS — POS SYSTEM (Single Tenant) - IMPROVED
+//  MODELS — POS SYSTEM (Multi-Store / Multi-Tenant)
 // ---------------------------------------------------------
 
-// Tabela unificada de usuários para login
 model User {
   id        String   @id @default(auto()) @db.ObjectId @map("_id")
   email     String
@@ -22,48 +21,39 @@ model User {
   name      String
   phone     String?
   active    Boolean  @default(true)
+  avatar    String?  // caminho/URL da foto do usuário
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   userType  String   // 'owner' | 'operator'
+  role      String?  // 'cashier' | 'manager' | 'supervisor' | etc.
 
-  // Agora companyId é obrigatório
   companyId String   @db.ObjectId
   company   Company  @relation(fields: [companyId], references: [id])
 
-  // Se for OPERATOR
   storeId   String?  @db.ObjectId
   store     Store?   @relation(fields: [storeId], references: [id])
-  role      String?  // 'cashier' | 'manager' | 'supervisor' | etc.
 
-  sessions        Session[] // Um usuário pode ter múltiplas sessões (refresh tokens) ativas.
+  sessions Session[]
+  sales    Sale[]
+  cashiers Cashier[]
 
-  sales     Sale[]
-  cashiers  Cashier[]
-
-  @@unique([email, companyId]) // garante que email não se repita dentro da mesma empresa
+  @@unique([email, companyId])
   @@index([userType])
   @@index([companyId])
   @@index([storeId])
 }
 
 model Session {
-  id            String    @id @default(auto()) @db.ObjectId @map("_id")
-  // Armazena o Refresh Token assinado. 
-  // Usamos @unique para garantir que cada token seja único no DB.
-  token         String    @unique
-  
-  userId        String    @db.ObjectId
-  user          User      @relation(fields: [userId], references: [id])
-  
-  // A data em que o token deve ser considerado inválido.
-  expiresAt     DateTime  
-  createdAt     DateTime  @default(now())
-  
-  // Detalhes da sessão (Útil para mostrar ao usuário onde ele está logado)
-  userAgent     String?   // Ex: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
-  ipAddress     String?   // O endereço IP de onde o login foi feito
-  
+  id        String    @id @default(auto()) @db.ObjectId @map("_id")
+  token     String    @unique
+  userId    String    @db.ObjectId
+  user      User      @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userAgent String?
+  ipAddress String?
+
   @@index([userId])
   @@index([expiresAt])
 }
@@ -100,9 +90,10 @@ model Store {
   companyId String   @db.ObjectId
   company   Company  @relation(fields: [companyId], references: [id])
 
-  users    User[]    // Operators
+  users    User[]
   cashiers Cashier[]
   sales    Sale[]
+  products Product[]
 
   @@index([companyId])
   @@index([status])
@@ -124,38 +115,34 @@ model Product {
   id          String   @id @default(auto()) @db.ObjectId @map("_id")
   name        String
   description String?
-  price       Float
-  barcode     String?  @unique
+  costPrice   Float?      
+  salePrice   Float       
+  barcode     String?     
   active      Boolean  @default(true)
+  quantity    Int      @default(0)
+  minStock    Int?
+  location    String?
+  image       String?  // caminho/URL da imagem do produto
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   categoryId String?   @db.ObjectId
   category   Category? @relation(fields: [categoryId], references: [id])
 
-  stock     Stock?
+  storeId String   @db.ObjectId
+  store   Store    @relation(fields: [storeId], references: [id])
+
   saleItems SaleItem[]
 
   @@index([categoryId])
   @@index([active])
-}
-
-model Stock {
-  id        String   @id @default(auto()) @db.ObjectId @map("_id")
-  productId String   @unique @db.ObjectId
-  product   Product  @relation(fields: [productId], references: [id])
-
-  quantity  Int
-  minStock  Int?     // Estoque mínimo para alerta
-  location  String?
-  updatedAt DateTime @updatedAt
+  @@index([storeId])
 }
 
 model Cashier {
   id            String    @id @default(auto()) @db.ObjectId @map("_id")
   storeId       String    @db.ObjectId
   userId        String    @db.ObjectId
-  
   openingAmount Float
   closingAmount Float?
   openedAt      DateTime  @default(now())
@@ -175,8 +162,8 @@ model Sale {
   date          DateTime @default(now())
   total         Float
   discount      Float    @default(0)
-  paymentMethod String   // 'cash' | 'credit' | 'debit' | 'pix'
-  status        String   @default("completed") // 'completed' | 'cancelled'
+  paymentMethod String
+  status        String   @default("completed") 
 
   userId     String   @db.ObjectId
   storeId    String   @db.ObjectId
@@ -199,7 +186,7 @@ model SaleItem {
   id        String @id @default(auto()) @db.ObjectId @map("_id")
   quantity  Int
   unitPrice Float
-  subtotal  Float  // quantity * unitPrice
+  subtotal  Float
 
   saleId    String @db.ObjectId
   productId String @db.ObjectId
@@ -227,8 +214,8 @@ model Customer {
 
 model Financial {
   id          String   @id @default(auto()) @db.ObjectId @map("_id")
-  type        String   // 'income' | 'expense'
-  category    String   // 'sale' | 'purchase' | 'salary' | etc.
+  type        String
+  category    String
   amount      Float
   date        DateTime @default(now())
   description String?
@@ -241,11 +228,10 @@ model Financial {
   @@index([date])
 }
 
-// Tabela para gerenciar permissões e módulos por role
 model Permission {
   id          String   @id @default(auto()) @db.ObjectId @map("_id")
-  role        String   // 'owner' | 'manager' | 'cashier' | etc.
-  module      String   // 'sales' | 'products' | 'reports' | 'users' | etc.
+  role        String
+  module      String
   canView     Boolean  @default(false)
   canCreate   Boolean  @default(false)
   canEdit     Boolean  @default(false)
