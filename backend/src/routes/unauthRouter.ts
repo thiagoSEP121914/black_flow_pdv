@@ -1,5 +1,5 @@
 import { Router } from "express";
-import loginController from "../features/login/LoginController.js";
+import AuthController from "../features/auth/AuthController.js";
 
 export class UnauthRouter {
     public router: Router;
@@ -10,7 +10,7 @@ export class UnauthRouter {
     }
 
     private routes() {
-        this.router.use("/unauth", loginController);
+        this.router.use("/unauth", AuthController);
     }
 }
 
