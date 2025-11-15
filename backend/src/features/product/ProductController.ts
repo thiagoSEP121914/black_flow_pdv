@@ -20,7 +20,6 @@ export class ProductController extends Controller {
     }
 
     handle(): Router {
-    
         this.route.post("/", async (req: Request, res: Response) => {
             try {
                 const { companyId } = (req as AuthenticateRequest).user;
@@ -133,7 +132,7 @@ export class ProductController extends Controller {
                 return res.status(error.message.includes("not found") ? 404 : 400).json({ error: error.message });
             }
         });
-       
+
         this.route.delete("/:id", async (req: Request, res: Response) => {
             try {
                 const { companyId } = (req as AuthenticateRequest).user;
@@ -161,5 +160,5 @@ export class ProductController extends Controller {
         return this.route;
     }
 }
-
-export const productController = new ProductController().handle();
+const productController = new ProductController();
+export default productController.handle();

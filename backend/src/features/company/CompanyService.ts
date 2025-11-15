@@ -30,7 +30,7 @@ export class CompanyService {
                 status: data.status || "active",
             },
             include: {
-                owners: true,
+                users: true,
                 stores: true,
             },
         });
@@ -41,7 +41,7 @@ export class CompanyService {
     async getAllCompanies() {
         return await prisma.company.findMany({
             include: {
-                owners: {
+                users: {
                     where: { active: true },
                 },
                 stores: {
@@ -50,7 +50,7 @@ export class CompanyService {
                 _count: {
                     select: {
                         stores: true,
-                        owners: true,
+                        users: true,
                         financialItems: true,
                     },
                 },
@@ -65,7 +65,7 @@ export class CompanyService {
         return await prisma.company.findUnique({
             where: { id },
             include: {
-                owners: {
+                users: {
                     where: { active: true },
                 },
                 stores: true,
@@ -82,7 +82,7 @@ export class CompanyService {
             where: { id },
             data,
             include: {
-                owners: true,
+                users: true,
                 stores: true,
             },
         });
@@ -122,7 +122,7 @@ export class CompanyService {
                     status: "active",
                 },
             }),
-            prisma.owner.count({
+            prisma.user.count({
                 where: {
                     companyId,
                     active: true,
@@ -153,7 +153,7 @@ export class CompanyService {
                 _count: {
                     select: {
                         stores: true,
-                        owners: true,
+                        users: true,
                     },
                 },
             },
@@ -173,7 +173,7 @@ export class CompanyService {
                 _count: {
                     select: {
                         stores: true,
-                        owners: true,
+                        users: true,
                     },
                 },
             },
