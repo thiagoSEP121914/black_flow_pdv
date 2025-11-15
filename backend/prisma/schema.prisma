@@ -17,7 +17,7 @@ datasource db {
 // Tabela unificada de usuários para login
 model User {
   id        String   @id @default(auto()) @db.ObjectId @map("_id")
-  email     String   @unique
+  email     String
   password  String
   name      String
   phone     String?
@@ -25,22 +25,21 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Tipo de usuário: 'owner' ou 'operator'
   userType  String   // 'owner' | 'operator'
-  
-  // Se for OWNER
-  companyId String?  @db.ObjectId
-  company   Company? @relation(fields: [companyId], references: [id])
-  
+
+  // Agora companyId é obrigatório
+  companyId String   @db.ObjectId
+  company   Company  @relation(fields: [companyId], references: [id])
+
   // Se for OPERATOR
   storeId   String?  @db.ObjectId
   store     Store?   @relation(fields: [storeId], references: [id])
   role      String?  // 'cashier' | 'manager' | 'supervisor' | etc.
 
-  // Relações
   sales     Sale[]
   cashiers  Cashier[]
 
+  @@unique([email, companyId]) // garante que email não se repita dentro da mesma empresa
   @@index([userType])
   @@index([companyId])
   @@index([storeId])
@@ -58,7 +57,7 @@ model Company {
   updatedAt DateTime @updatedAt
 
   stores         Store[]
-  users          User[]      // Owners da empresa
+  users          User[]
   financialItems Financial[]
 
   @@index([status])
@@ -78,7 +77,7 @@ model Store {
   companyId String   @db.ObjectId
   company   Company  @relation(fields: [companyId], references: [id])
 
-  users    User[]    // Operators da loja
+  users    User[]    // Operators
   cashiers Cashier[]
   sales    Sale[]
 
