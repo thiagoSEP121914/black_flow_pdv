@@ -1,10 +1,10 @@
 import {
-  HashRouter as Router,
+  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
-import { Login, Dashboard, NotFound } from "@/pages";
+import { Login, Dashboard, NotFound, SignUp } from "@/pages";
 import { useAuth } from "@/shared/hooks";
 
 // Rota protegida
@@ -23,7 +23,8 @@ export const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/auth/login" element={<Login />} />
+  <Route path="/auth/login" element={<Login />} />
+  <Route path="/auth/signup" element={<SignUp />} />
 
         <Route
           path="/"
