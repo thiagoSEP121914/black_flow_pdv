@@ -61,7 +61,7 @@ export function Login() {
           {/* Footer text */}
           <div className="mt-8 text-sm text-gray-600">
             <p>
-              Ainda não tem acesso?{' '}
+              Ainda não tem acesso?{" "}
               <a
                 href="/auth/signup"
                 className="text-emerald-500 hover:text-emerald-600 font-medium hover:underline"
