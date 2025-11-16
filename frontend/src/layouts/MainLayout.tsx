@@ -1,4 +1,5 @@
 import React from "react";
+import { SideBar } from "@/shared/components";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -7,8 +8,8 @@ interface MainLayoutProps {
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar virá aqui */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <SideBar />
+      <div className="flex-1 flex flex-col overflow-hidden ml-64">
         {/* Header virá aqui */}
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
