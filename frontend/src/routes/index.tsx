@@ -1,5 +1,5 @@
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -7,6 +7,7 @@ import {
 import { Login, Dashboard, NotFound } from "@/pages";
 import { useAuth } from "@/shared/hooks";
 
+// Rota protegida
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
 
@@ -17,6 +18,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Definição das rotas
 export const AppRoutes = () => {
   return (
     <Router>
@@ -33,6 +35,7 @@ export const AppRoutes = () => {
         />
 
         <Route path="/404" element={<NotFound />} />
+
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
     </Router>
