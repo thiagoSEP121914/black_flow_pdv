@@ -18,7 +18,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Definição das rotas
+// Definição das rotass
 export const AppRoutes = () => {
   return (
     <Router>

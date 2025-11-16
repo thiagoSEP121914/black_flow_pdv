@@ -61,12 +61,12 @@ export function Login() {
           {/* Footer text */}
           <div className="mt-8 text-sm text-gray-600">
             <p>
-              Ainda não tem acesso? Adquira sua chave de licença agora:{" "}
+              Ainda não tem acesso?{' '}
               <a
-                href="https://github.com/thiagosHPD1914/delta_pdv"
-                className="text-cyan-500 hover:text-cyan-600 font-medium hover:underline"
+                href="/auth/signup"
+                className="text-emerald-500 hover:text-emerald-600 font-medium hover:underline"
               >
-                https://github.com/thiagosHPD1914/delta_pdv
+                Criar conta
               </a>
             </p>
           </div>
