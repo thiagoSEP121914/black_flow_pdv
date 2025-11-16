@@ -65,7 +65,17 @@ export default function PieChart({
       acc.currentAngle = endAngle;
       return acc;
     },
-    { segments: [] as Array<IPieChartData & { percentage: number; startAngle: number; endAngle: number; color: string }>, currentAngle: -90 }
+    {
+      segments: [] as Array<
+        IPieChartData & {
+          percentage: number;
+          startAngle: number;
+          endAngle: number;
+          color: string;
+        }
+      >,
+      currentAngle: -90,
+    }
   );
 
   const createArc = (startAngle: number, endAngle: number, radius: number) => {
