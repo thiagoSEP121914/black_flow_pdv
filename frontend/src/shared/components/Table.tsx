@@ -14,7 +14,7 @@ interface ITableProps<T> {
   emptyMessage?: string;
   className?: string;
 }
-export default function Table<T extends Record<string, unknown>>({
+export function Table<T extends Record<string, unknown>>({
   data = [],
   columns = [],
   onRowClick,

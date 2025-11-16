@@ -1,3 +1,5 @@
 export { SideBar } from "./SideBar";
 export { Card } from "./Card";
-export { default as Table } from "./Table";
+export { Table } from "./Table";
+export { PieChart } from "./PieChart";
+export { BarChart } from "./Barchart";

@@ -26,7 +26,7 @@ const DEFAULT_COLORS = [
   "#84cc16", // lime
 ];
 
-export default function PieChart({
+export function PieChart({
   data,
   title,
   size = 200,

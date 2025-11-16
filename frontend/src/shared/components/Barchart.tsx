@@ -15,7 +15,7 @@ interface IBarChartProps {
   labelRotate?: boolean;
 }
 
-export default function BarChart({
+export function BarChart({
   data,
   title,
   height = 300,
