@@ -61,12 +61,21 @@ export function Login() {
           {/* Footer text */}
           <div className="mt-8 text-sm text-gray-600">
             <p>
+<<<<<<< HEAD
               Ainda não tem acesso? Adquira sua chave de licença agora:{" "}
               <a
                 href="https://github.com/thiagosHPD1914/delta_pdv"
                 className="text-cyan-500 hover:text-cyan-600 font-medium hover:underline"
               >
                 https://github.com/thiagosHPD1914/delta_pdv
+=======
+              Ainda não tem acesso?{" "}
+              <a
+                href="/auth/signup"
+                className="text-emerald-500 hover:text-emerald-600 font-medium hover:underline"
+              >
+                Criar conta
+>>>>>>> af29146 (git add src/pages/SignUp.tsx src/shared/components/Input.tsx src/pages/Login.tsx src/pages/index.ts src/routes/index.tsx src/shared/components/index.ts)
               </a>
             </p>
           </div>
