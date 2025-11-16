@@ -4,11 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-<<<<<<< HEAD
 import { Login, Dashboard, NotFound } from "@/pages";
-=======
-import { Login, Dashboard, NotFound, SignUp } from "@/pages";
->>>>>>> af29146 (git add src/pages/SignUp.tsx src/shared/components/Input.tsx src/pages/Login.tsx src/pages/index.ts src/routes/index.tsx src/shared/components/index.ts)
 import { useAuth } from "@/shared/hooks";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -26,10 +22,6 @@ export const AppRoutes = () => {
     <Router>
       <Routes>
         <Route path="/auth/login" element={<Login />} />
-<<<<<<< HEAD
-=======
-        <Route path="/auth/signup" element={<SignUp />} />
->>>>>>> af29146 (git add src/pages/SignUp.tsx src/shared/components/Input.tsx src/pages/Login.tsx src/pages/index.ts src/routes/index.tsx src/shared/components/index.ts)
 
         <Route
           path="/"
