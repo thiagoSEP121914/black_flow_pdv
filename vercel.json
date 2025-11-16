@@ -1,0 +1,11 @@
+{
+  "builds": [{ "src": "frontend/package.json", "use": "@vercel/static-build" }],
+  "routes": [
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/frontend/vite.svg", "dest": "/frontend/vite.svg" },
+    { "src": "/vite.svg", "dest": "/vite.svg" },
+    { "src": "/favicon.ico", "dest": "/favicon.ico" },
+    { "src": "^/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
