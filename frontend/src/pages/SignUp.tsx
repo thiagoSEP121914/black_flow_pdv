@@ -78,20 +78,11 @@ export default function SignUp() {
       // Simulação de chamada API
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Aqui você faria a chamada real para a API:
-      // const response = await fetch('/api/auth/signup', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
-      // const data = await response.json();
-
       console.log("Signup data:", formData);
       setSuccess(true);
 
       // Redirecionar após sucesso
       setTimeout(() => {
-        // navigate('/login') ou window.location.href = '/login'
         console.log("Redirecting to login...");
       }, 2000);
     } catch (error) {
@@ -113,7 +104,7 @@ export default function SignUp() {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Form */}
-      <div className="w-1/2 bg-white flex items-center justify-center p-12">
+      <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="w-12 h-12 bg-emerald-500 rounded-lg mb-8"></div>
@@ -257,8 +248,8 @@ export default function SignUp() {
         </div>
       </div>
 
-      {/* Right Side - Illustration */}
-      <div className="w-1/2 bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center p-12">
+      {/* Right Side - Illustration (hidden on mobile) */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-500 to-emerald-600 items-center justify-center p-12">
         <div className="text-center text-white max-w-md">
           <div className="mb-8">
             <svg
