@@ -26,7 +26,6 @@ function getRefreshSecret(): string {
     return key;
 }
 
-// ----- GERAÇÃO DE TOKENS -----
 export function generateAccessToken(payload: AccessTokenPayload) {
     return jwt.sign(payload, getAccessSecret(), {
         expiresIn: process.env.ACCESS_EXPIRES_IN || "15m",

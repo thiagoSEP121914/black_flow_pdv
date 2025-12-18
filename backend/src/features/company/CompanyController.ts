@@ -13,7 +13,6 @@ declare global {
 
 export class CompanyController extends Controller {
     handle(): Router {
-        // ------------------ CREATE COMPANY ------------------
         this.route.post("/", authenticateToken, async (req: Request, res: Response) => {
             try {
                 // Apenas owner pode criar (no MVP, geralmente já criado na signup)
@@ -26,7 +25,6 @@ export class CompanyController extends Controller {
             }
         });
 
-        // ------------------ GET MY COMPANY ------------------
         this.route.get("/me", authenticateToken, async (req: Request, res: Response) => {
             try {
                 const companyId = req.user?.companyId; // middleware auth
@@ -40,7 +38,6 @@ export class CompanyController extends Controller {
             }
         });
 
-        // ------------------ UPDATE COMPANY ------------------
         this.route.put("/me", authenticateToken, async (req: Request, res: Response) => {
             try {
                 const companyId = req.user?.companyId;

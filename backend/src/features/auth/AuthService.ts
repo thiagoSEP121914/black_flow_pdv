@@ -23,7 +23,6 @@ interface LoginResponseDTO {
 }
 
 export class AuthService {
-    // ------------------- SIGNUP -------------------
     async signupOwner(data: SignupDTO) {
         const hashedPassword = await bcrypt.hash(data.password, 10);
 
@@ -48,7 +47,6 @@ export class AuthService {
         return { company, user };
     }
 
-    // ------------------- LOGIN -------------------
     async loginUser(data: LoginDTO, req: Request): Promise<LoginResponseDTO> {
         const user = await prisma.user.findFirst({
             where: { email: data.email, active: true },
@@ -59,7 +57,6 @@ export class AuthService {
         const isValid = await bcrypt.compare(data.password, user.password);
         if (!isValid) throw new Error("Invalid credentials");
 
-        // Gera tokens
         const accessToken = generateAccessToken({
             id: user.id,
             email: user.email,
@@ -75,7 +72,6 @@ export class AuthService {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7); // 7 dias
 
-        // Salva sessão
         await prisma.session.create({
             data: {
                 token: refreshToken,
@@ -119,7 +115,6 @@ export class AuthService {
         return { accessToken };
     }
 
-    // ------------------- LOGOUT -------------------
     async logout(token: string) {
         await prisma.session.deleteMany({ where: { token } });
         return { message: "Logged out successfully" };

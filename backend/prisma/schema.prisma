@@ -12,54 +12,61 @@ datasource db {
 
 // ---------------------------------------------------------
 //  MODELS — POS SYSTEM (Multi-Store / Multi-Tenant)
+//  🔒 ISOLAMENTO TOTAL POR EMPRESA
 // ---------------------------------------------------------
 
 model User {
-  id        String   @id @default(auto()) @db.ObjectId @map("_id")
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String
   password  String
   name      String
   phone     String?
   active    Boolean  @default(true)
-  avatar    String?  // caminho/URL da foto do usuário
+  avatar    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  userType  String   // 'owner' | 'operator'
-  role      String?  // 'cashier' | 'manager' | 'supervisor' | etc.
+  userType String  // 'owner' | 'operator'
+  role     String? // 'cashier' | 'manager' | 'supervisor'
 
-  companyId String   @db.ObjectId
-  company   Company  @relation(fields: [companyId], references: [id])
+  companyId String  @db.ObjectId
+  company   Company @relation(fields: [companyId], references: [id])
 
-  storeId   String?  @db.ObjectId
-  store     Store?   @relation(fields: [storeId], references: [id])
+  storeId String? @db.ObjectId
+  store   Store?  @relation(fields: [storeId], references: [id])
 
   sessions Session[]
   sales    Sale[]
   cashiers Cashier[]
 
   @@unique([email, companyId])
-  @@index([userType])
   @@index([companyId])
+  @@index([companyId, userType])
+  @@index([companyId, active])
   @@index([storeId])
 }
 
 model Session {
-  id        String    @id @default(auto()) @db.ObjectId @map("_id")
-  token     String    @unique
-  userId    String    @db.ObjectId
-  user      User      @relation(fields: [userId], references: [id])
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
   userAgent String?
   ipAddress String?
 
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  companyId String @db.ObjectId
+
   @@index([userId])
-  @@index([expiresAt])
+  @@index([companyId])
+  @@index([companyId, expiresAt])
+  @@index([token, companyId])
 }
 
 model Company {
-  id        String   @id @default(auto()) @db.ObjectId @map("_id")
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   cnpj      String?  @unique
   phone     String?
@@ -71,13 +78,19 @@ model Company {
 
   stores         Store[]
   users          User[]
+  products       Product[]
+  categories     Category[]
+  customers      Customer[]
+  sales          Sale[]
+  cashiers       Cashier[]
   financialItems Financial[]
+  permissions    Permission[]
 
   @@index([status])
 }
 
 model Store {
-  id        String   @id @default(auto()) @db.ObjectId @map("_id")
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   cnpj      String?
   phone     String?
@@ -87,8 +100,8 @@ model Store {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  companyId String   @db.ObjectId
-  company   Company  @relation(fields: [companyId], references: [id])
+  companyId String  @db.ObjectId
+  company   Company @relation(fields: [companyId], references: [id])
 
   users    User[]
   cashiers Cashier[]
@@ -96,132 +109,158 @@ model Store {
   products Product[]
 
   @@index([companyId])
-  @@index([status])
+  @@index([companyId, status])
 }
 
 model Category {
-  id          String   @id @default(auto()) @db.ObjectId @map("_id")
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  companyId String  @db.ObjectId
+  company   Company @relation(fields: [companyId], references: [id])
 
   products Product[]
 
-  @@index([name])
+  @@index([companyId])
+  @@index([companyId, name])
+  @@index([companyId, active])
 }
-// ... (Model Category permanece inalterado)
 
 model Product {
-  id          String   @id @default(auto()) @db.ObjectId @map("_id")
-  name        String
-  description String?
-  costPrice   Float?      
-  salePrice   Float       
-  barcode     String?     
-  active      Boolean  @default(true)
-  quantity    Int      @default(0)
-  minStock    Int?
-  location    String?
-  image       String?  // caminho/URL da imagem do produto
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  costPrice   Float?
+  salePrice   Float
+  barcode     String?
+  active      Boolean  @default(true)
+  quantity    Int      @default(0)
+  minStock    Int?
+  location    String?
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  // 1. CHAVE E RELAÇÃO (Referência para integridade)
-  categoryId String?   @db.ObjectId
-  category   Category? @relation(fields: [categoryId], references: [id])
-  
-  // 2. ✅ CAMPOS INCORPORADOS (Otimização para leitura no MongoDB)
-  categoryName   String? // Nome da categoria para consultas rápidas
-  categoryActive Boolean @default(true) // Status da categoria no momento da criação/atualização
-  
-  storeId String   @db.ObjectId
-  store   Store    @relation(fields: [storeId], references: [id])
+  categoryId     String?   @db.ObjectId
+  category       Category? @relation(fields: [categoryId], references: [id])
+  categoryName   String?
+  categoryActive Boolean   @default(true)
 
-  saleItems SaleItem[]
+  companyId String  @db.ObjectId
+  company   Company @relation(fields: [companyId], references: [id])
 
-  @@index([categoryId])
-  @@index([active])
-  @@index([storeId])
-  @@index([categoryName]) // Opcional: para busca por nome de categoria
+  storeId String @db.ObjectId
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  saleItems SaleItem[]
+
+  @@index([companyId])
+  @@index([companyId, active])
+  @@index([companyId, storeId])
+  @@index([companyId, categoryId])
+  @@index([companyId, barcode])
+  @@index([storeId])
 }
 
 model Cashier {
-  id            String    @id @default(auto()) @db.ObjectId @map("_id")
-  storeId       String    @db.ObjectId
-  userId        String    @db.ObjectId
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
   openingAmount Float
   closingAmount Float?
   openedAt      DateTime  @default(now())
   closedAt      DateTime?
   status        String    // 'open' | 'closed'
 
-  store Store @relation(fields: [storeId], references: [id])
-  user  User  @relation(fields: [userId], references: [id])
+  companyId String  @db.ObjectId
+  company   Company @relation(fields: [companyId], references: [id])
 
+  storeId String @db.ObjectId
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([companyId])
+  @@index([companyId, status])
+  @@index([companyId, storeId])
   @@index([storeId])
   @@index([userId])
-  @@index([status])
 }
 
 model Sale {
-  id            String   @id @default(auto()) @db.ObjectId @map("_id")
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
   date          DateTime @default(now())
   total         Float
   discount      Float    @default(0)
   paymentMethod String
-  status        String   @default("completed") 
+  status        String   @default("completed")
 
-  userId     String   @db.ObjectId
-  storeId    String   @db.ObjectId
-  customerId String?  @db.ObjectId
+  companyId String  @db.ObjectId
+  company   Company @relation(fields: [companyId], references: [id])
 
-  user     User      @relation(fields: [userId], references: [id])
-  store    Store     @relation(fields: [storeId], references: [id])
-  customer Customer? @relation(fields: [customerId], references: [id])
+  storeId String @db.ObjectId
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  customerId String?   @db.ObjectId
+  customer   Customer? @relation(fields: [customerId], references: [id])
 
   items SaleItem[]
 
-  @@index([userId])
+  @@index([companyId])
+  @@index([companyId, date])
+  @@index([companyId, status])
+  @@index([companyId, storeId])
   @@index([storeId])
+  @@index([userId])
   @@index([customerId])
-  @@index([date])
-  @@index([status])
 }
 
 model SaleItem {
-  id        String @id @default(auto()) @db.ObjectId @map("_id")
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
   quantity  Int
   unitPrice Float
   subtotal  Float
 
-  saleId    String @db.ObjectId
-  productId String @db.ObjectId
+  saleId String @db.ObjectId
+  sale   Sale   @relation(fields: [saleId], references: [id])
 
-  sale    Sale    @relation(fields: [saleId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
 
   @@index([saleId])
   @@index([productId])
 }
 
 model Customer {
-  id        String   @id @default(auto()) @db.ObjectId @map("_id")
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   email     String?
   phone     String?
-  cpf       String?  @unique
+  cpf       String?
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId String  @db.ObjectId
+  company   Company @relation(fields: [companyId], references: [id])
 
   sales Sale[]
 
-  @@index([phone])
+  @@unique([cpf, companyId])
+  @@index([companyId])
+  @@index([companyId, phone])
+  @@index([companyId, active])
 }
 
 model Financial {
-  id          String   @id @default(auto()) @db.ObjectId @map("_id")
-  type        String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  type        String   // 'income' | 'expense'
   category    String
   amount      Float
   date        DateTime @default(now())
@@ -231,21 +270,27 @@ model Financial {
   company   Company @relation(fields: [companyId], references: [id])
 
   @@index([companyId])
-  @@index([type])
-  @@index([date])
+  @@index([companyId, type])
+  @@index([companyId, date])
+  @@index([companyId, category])
 }
 
 model Permission {
-  id          String   @id @default(auto()) @db.ObjectId @map("_id")
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
   role        String
   module      String
-  canView     Boolean  @default(false)
-  canCreate   Boolean  @default(false)
-  canEdit     Boolean  @default(false)
-  canDelete   Boolean  @default(false)
+  canView     Boolean @default(false)
+  canCreate   Boolean @default(false)
+  canEdit     Boolean @default(false)
+  canDelete   Boolean @default(false)
   description String?
 
-  @@unique([role, module], map: "role_module")
+  companyId String  @db.ObjectId
+  company   Company @relation(fields: [companyId], references: [id])
+
+  @@unique([role, module, companyId])
+  @@index([companyId])
+  @@index([companyId, role])
   @@index([role])
   @@index([module])
 }

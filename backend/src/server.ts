@@ -1,6 +1,6 @@
 import express from "express";
 import { config } from "dotenv";
-import unauthRouter from "./routes/unauthRouter.js";
+import router from "./routes/route.js";
 
 config();
 const server = express();
@@ -10,7 +10,7 @@ server.get("/", (req, res) => {
     res.json("Hello world");
 });
 
-server.use("/", unauthRouter);
+server.use("/", router);
 
 server.listen(PORT, () => {
     console.log(`Server is running on the ${PORT}`);

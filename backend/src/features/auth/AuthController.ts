@@ -68,7 +68,6 @@ export class AuthController extends Controller {
             }
         });
 
-        // ------------------ LOGOUT ------------------
         this.route.post("/logout", async (req: Request, res: Response) => {
             try {
                 const { refreshToken } = req.body;
