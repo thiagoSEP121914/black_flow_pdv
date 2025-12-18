@@ -237,7 +237,7 @@ export default function SignUp() {
               <div className="text-center text-sm text-gray-600">
                 Já tem uma conta?{" "}
                 <a
-                  href="/login"
+                  href="/auth/login"
                   className="text-emerald-500 hover:text-emerald-600 font-semibold hover:underline"
                 >
                   Fazer Login
