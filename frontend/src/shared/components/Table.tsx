@@ -14,6 +14,7 @@ interface ITableProps<T> {
   emptyMessage?: string;
   className?: string;
 }
+
 export function Table<T extends Record<string, unknown>>({
   data = [],
   columns = [],
@@ -33,11 +34,11 @@ export function Table<T extends Record<string, unknown>>({
     <div className={`overflow-x-auto ${className}`}>
       <table className="w-full">
         <thead>
-          <tr className="border-b-2 border-gray-200 bg-gray-50">
+          <tr className="border-b border-gray-200">
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`text-left py-3 px-4 text-sm font-semibold text-gray-700 ${column.className || ""}`}
+                className={`text-left py-3 px-4 text-xs font-semibold text-gray-600 bg-transparent ${column.className || ""}`}
               >
                 {column.header}
               </th>
@@ -66,7 +67,7 @@ export function Table<T extends Record<string, unknown>>({
                 {columns.map((column) => (
                   <td
                     key={column.key}
-                    className={`py-3 px-4 text-sm text-gray-900 ${column.className || ""}`}
+                    className={`py-3 px-4 text-xs text-gray-700 ${column.className || ""}`}
                   >
                     {column.render
                       ? column.render(item)

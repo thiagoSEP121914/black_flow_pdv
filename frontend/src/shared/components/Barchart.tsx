@@ -13,6 +13,7 @@ interface IBarChartProps {
   valueSuffix?: string;
   barColor?: string;
   labelRotate?: boolean;
+  direction?: "vertical" | "horizontal";
 }
 
 export function BarChart({
@@ -24,6 +25,7 @@ export function BarChart({
   valueSuffix = "",
   barColor = "#10b981",
   labelRotate = false,
+  direction = "vertical",
 }: IBarChartProps) {
   if (!data || data.length === 0) {
     return (
@@ -43,6 +45,51 @@ export function BarChart({
     return Math.round(value);
   }).reverse();
 
+  // Horizontal layout
+  if (direction === "horizontal") {
+    return (
+      <div className="w-full">
+        {title && (
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+        )}
+
+        <div className="space-y-3">
+          {data.map((item, index) => {
+            const percentage = ((item.value - minValue) / (range || 1)) * 100;
+            const itemColor = item.color || barColor;
+
+            return (
+              <div key={index} className="flex items-center gap-3">
+                <div className="w-24 text-xs font-medium text-gray-700 truncate">
+                  {item.label}
+                </div>
+                <div className="flex-1 h-6 bg-gray-100 rounded-md overflow-hidden">
+                  <div
+                    className="h-full rounded-md transition-all duration-300 hover:opacity-80"
+                    style={{
+                      width: `${percentage}%`,
+                      backgroundColor: itemColor,
+                      minWidth: percentage > 0 ? "4px" : "0",
+                    }}
+                    title={`${item.label}: ${valuePrefix}${item.value.toLocaleString()}${valueSuffix}`}
+                  />
+                </div>
+                {showValues && (
+                  <div className="w-12 text-xs font-semibold text-gray-600 text-right">
+                    {valuePrefix}
+                    {item.value.toLocaleString()}
+                    {valueSuffix}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // Vertical layout (original)
   return (
     <div className="w-full">
       {title && (
