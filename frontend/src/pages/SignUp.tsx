@@ -249,7 +249,7 @@ export default function SignUp() {
       </div>
 
       {/* Right Side - Illustration (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-500 to-emerald-600 items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-emerald-500 to-emerald-600 items-center justify-center p-12">
         <div className="text-center text-white max-w-md">
           <div className="mb-8">
             <svg

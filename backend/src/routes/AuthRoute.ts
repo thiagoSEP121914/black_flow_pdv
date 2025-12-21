@@ -9,8 +9,6 @@ class AuthRouter {
     }
 
     routes() {
-        this.router.use();
-
         return this.router;
     }
 }
