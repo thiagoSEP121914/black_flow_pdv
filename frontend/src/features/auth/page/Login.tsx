@@ -1,11 +1,32 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  loginSchema,
+  type LoginInput,
+} from "@/features/auth/schemas/login.schema";
+import { loginUseCase } from "@/features/auth/useCases";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 export function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = () => {
-    console.log("Login:", { email, password });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginInput) => {
+    try {
+      await loginUseCase.execute(data);
+      toast.success("Login realizado com sucesso!");
+      navigate("/dashboard");
+    } catch (err) {
+      toast.error(`Erro ao fazer login ${err}`);
+    }
   };
 
   return (
@@ -19,7 +40,7 @@ export function Login() {
             Cresça seu negócio com confiança.
           </p>
 
-          <div className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Usuário*
@@ -27,10 +48,14 @@ export function Login() {
               <input
                 type="email"
                 placeholder="Entre com seu Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register("email")}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition"
               />
+              {errors.email && (
+                <span className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
+                </span>
+              )}
             </div>
 
             <div>
@@ -40,19 +65,24 @@ export function Login() {
               <input
                 type="password"
                 placeholder="Digite sua senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password")}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition"
               />
+              {errors.password && (
+                <span className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </span>
+              )}
             </div>
 
             <button
-              onClick={handleSubmit}
+              type="submit"
+              disabled={isSubmitting}
               className="w-full bg-emerald-500 text-white py-4 rounded-lg hover:bg-emerald-600 transition font-semibold text-lg shadow-lg hover:shadow-xl"
             >
-              Login
+              {isSubmitting ? "Entrando..." : "Login"}
             </button>
-          </div>
+          </form>
 
           {/* Footer text */}
           <div className="mt-8 text-sm text-gray-600">

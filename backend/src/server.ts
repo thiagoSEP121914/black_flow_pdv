@@ -1,10 +1,12 @@
 import express from "express";
 import { config } from "dotenv";
 import router from "./routes/route.js";
+import cors from "cors";
 
 config();
 const server = express();
 const PORT = 8080;
+server.use(cors());
 server.use(express.json());
 server.get("/", (req, res) => {
     res.json("Hello world");

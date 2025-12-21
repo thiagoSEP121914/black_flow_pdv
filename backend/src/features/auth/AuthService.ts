@@ -50,12 +50,27 @@ export class AuthService {
     async loginUser(data: LoginDTO, req: Request): Promise<LoginResponseDTO> {
         const user = await prisma.user.findFirst({
             where: { email: data.email, active: true },
+            select: {
+                id: true,
+                email: true,
+                password: true,
+                name: true,
+                userType: true,
+                companyId: true, 
+                storeId: true,
+                role: true,
+            },
         });
 
         if (!user) throw new Error("Invalid credentials");
+       
 
         const isValid = await bcrypt.compare(data.password, user.password);
         if (!isValid) throw new Error("Invalid credentials");
+
+        if (!user.companyId) {
+            throw new Error("User does not have a company associated");
+        }
 
         const accessToken = generateAccessToken({
             id: user.id,
@@ -67,15 +82,15 @@ export class AuthService {
         });
 
         const refreshToken = generateRefreshToken({ id: user.id });
-
         const createdAt = new Date();
         const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7); // 7 dias
+        expiresAt.setDate(expiresAt.getDate() + 7);
 
         await prisma.session.create({
             data: {
                 token: refreshToken,
                 userId: user.id,
+                companyId: user.companyId,
                 expiresAt,
                 userAgent: req.headers["user-agent"],
                 ipAddress: req.ip,
