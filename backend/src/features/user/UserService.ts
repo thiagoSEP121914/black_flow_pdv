@@ -23,7 +23,6 @@ export interface UpdateUserDTO {
 export class UserService {
     // ==================== CREATE ====================
     async createUser(data: CreateUserDTO) {
-        // Checa se já existe usuário ativo com esse email
         const existingUser = await prisma.user.findFirst({
             where: { email: data.email, active: true },
         });
@@ -32,7 +31,6 @@ export class UserService {
             throw new Error("This email is already active in another company");
         }
 
-        // Validações
         if (data.userType === "owner" && !data.companyId) {
             throw new Error("Company ID is required for owners");
         }
@@ -41,10 +39,8 @@ export class UserService {
             if (!data.role) throw new Error("Role is required for operators");
         }
 
-        // Hash da senha
         const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
 
-        // Cria o usuário
         const user = await prisma.user.create({
             data: {
                 email: data.email,

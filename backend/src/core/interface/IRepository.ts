@@ -16,7 +16,7 @@ export type SearchOutPut<Model> = {
     filter: string | null;
 };
 
-export interface Repository<Model, Obj> {
+export interface IRepository<Model, Obj> {
     findAll(params: SearchInput): Promise<SearchOutPut<Model>>;
 
     findById(id: string): Promise<Model>;
