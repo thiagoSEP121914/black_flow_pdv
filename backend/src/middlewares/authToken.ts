@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { SignOptions } from "jsonwebtoken";
+import { env } from "../core/env.js";
 
 export interface AccessTokenPayload {
     id: string; // user id
@@ -15,26 +16,26 @@ export interface RefreshTokenPayload {
 }
 
 function getAccessSecret(): string {
-    const key = process.env.JWT_ACCESS_SECRET;
+    const key = env.JWT_ACCESS_SECRET;
     if (!key) throw new Error("JWT_ACCESS_SECRET não definido no env");
     return key;
 }
 
 function getRefreshSecret(): string {
-    const key = process.env.JWT_REFRESH_SECRET;
+    const key = env.JWT_REFRESH_SECRET;
     if (!key) throw new Error("JWT_REFRESH_SECRET não definido no env");
     return key;
 }
 
 export function generateAccessToken(payload: AccessTokenPayload) {
     return jwt.sign(payload, getAccessSecret(), {
-        expiresIn: process.env.ACCESS_EXPIRES_IN || "15m",
+        expiresIn: env.ACCESS_EXPIRES_IN || "15m",
     } as SignOptions);
 }
 
 export function generateRefreshToken(payload: RefreshTokenPayload) {
     return jwt.sign(payload, getRefreshSecret(), {
-        expiresIn: process.env.REFRESH_EXPIRES_IN || "7d",
+        expiresIn: env.REFRESH_EXPIRES_IN || "7d",
     } as SignOptions);
 }
 

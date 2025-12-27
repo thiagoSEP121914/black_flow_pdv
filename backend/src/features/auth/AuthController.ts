@@ -20,7 +20,6 @@ export class AuthController extends Controller {
     private authService = new AuthService();
 
     handle() {
-        // ------------------ SIGNUP ------------------
         this.route.post("/signup", async (req: Request, res: Response) => {
             try {
                 const data = req.body as SignupDTO;
@@ -42,7 +41,6 @@ export class AuthController extends Controller {
             }
         });
 
-        // ------------------ LOGIN ------------------
         this.route.post("/login", async (req: Request, res: Response) => {
             try {
                 const data = req.body as LoginDTO;
@@ -54,7 +52,6 @@ export class AuthController extends Controller {
             }
         });
 
-        // ------------------ REFRESH ------------------
         this.route.post("/refresh", async (req: Request, res: Response) => {
             try {
                 const { refreshToken } = req.body;

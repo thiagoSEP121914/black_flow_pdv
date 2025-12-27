@@ -2,12 +2,18 @@ import express from "express";
 import { config } from "dotenv";
 import router from "./routes/route.js";
 import cors from "cors";
+import { logger } from "./utils/logger.js";
+import pinoHttpModule from "pino-http";
+import { env } from "./core/env.js";
 
 config();
 const server = express();
-const PORT = 8080;
+const pinoHttp = pinoHttpModule.default;
+server.use(pinoHttp({ logger }));
+const PORT = env.PORT;
 server.use(cors());
 server.use(express.json());
+
 server.get("/", (req, res) => {
     res.json("Hello world");
 });
@@ -15,5 +21,5 @@ server.get("/", (req, res) => {
 server.use("/", router);
 
 server.listen(PORT, () => {
-    console.log(`Server is running on the ${PORT}`);
+    logger.info(`Server is running on the PORT: ${PORT}`);
 });

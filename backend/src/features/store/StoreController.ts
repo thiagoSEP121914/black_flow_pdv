@@ -8,7 +8,6 @@ export interface AuthenticateRequest extends Request {
 }
 
 export class StoreController extends Controller {
-
     handle(): Router {
         this.route.post("/", async (req: Request, res: Response) => {
             try {

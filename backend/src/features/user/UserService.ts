@@ -76,8 +76,6 @@ export class UserService {
         return userWithoutPassword;
     }
 
-    // ==================== READ ====================
-
     async login(email: string, password: string) {
         const user = await prisma.user.findFirst({
             where: { email, active: true },
@@ -207,7 +205,6 @@ export class UserService {
         return { user, totalSales, totalRevenue: totalRevenue._sum.total || 0 };
     }
 
-    // ==================== UPDATE ====================
     async updateUser(id: string, data: UpdateUserDTO) {
         const user = await prisma.user.update({
             where: { id },
@@ -228,13 +225,11 @@ export class UserService {
         const user = await prisma.user.findUnique({ where: { id } });
         if (!user) throw new Error("User not found");
 
-        // Desativa outros usuários com mesmo email
         await prisma.user.updateMany({
             where: { email: user.email, active: true },
             data: { active: false },
         });
 
-        // Ativa usuário atual
         const updatedUser = await prisma.user.update({ where: { id }, data: { active: true } });
         const { password, ...userWithoutPassword } = updatedUser;
         return userWithoutPassword;
@@ -246,7 +241,6 @@ export class UserService {
         return userWithoutPassword;
     }
 
-    // ==================== DELETE ====================
     async deleteUser(id: string) {
         return prisma.user.delete({ where: { id } });
     }

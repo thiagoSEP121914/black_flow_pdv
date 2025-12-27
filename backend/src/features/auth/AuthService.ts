@@ -3,24 +3,24 @@ import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../../middlewares/authToken.js";
 import { Request } from "express";
 
-interface SignupDTO {
+type SignupDTO = {
     email: string;
     password: string;
     name: string;
     companyName: string;
-}
+};
 
-interface LoginDTO {
+type LoginDTO = {
     email: string;
     password: string;
-}
+};
 
-interface LoginResponseDTO {
+type LoginResponseDTO = {
     accessToken: string;
     refreshToken: string;
     expireIn: string;
     createdAt: string;
-}
+};
 
 export class AuthService {
     async signupOwner(data: SignupDTO) {
@@ -56,14 +56,13 @@ export class AuthService {
                 password: true,
                 name: true,
                 userType: true,
-                companyId: true, 
+                companyId: true,
                 storeId: true,
                 role: true,
             },
         });
 
         if (!user) throw new Error("Invalid credentials");
-       
 
         const isValid = await bcrypt.compare(data.password, user.password);
         if (!isValid) throw new Error("Invalid credentials");

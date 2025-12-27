@@ -1,16 +1,22 @@
-// src/core/env.ts
-function getEnvVar(key: string): string {
-  const value = process.env[key];
-  if (!value) throw new Error(`Missing environment variable: ${key}`);
-  return value;
+import { AppError } from "../errors/AppError.js";
+import "dotenv/config";
+import { z } from "zod";
+
+const envSchema = z.object({
+    NODE_ENV: z.enum(["developmente", "production", "test"]),
+    PORT: z.coerce.number().default(8080),
+    API_URL: z.string().default("http://localhost8080"),
+    DATA_BASE_URL: z.string(),
+    JWT_ACCESS_SECRET: z.string(),
+    JWT_REFRESH_SECRET: z.string(),
+    ACCESS_EXPIRES_IN: z.string().default("15m"),
+    REFRESH_EXPIRES_IN: z.string().default("7d"),
+});
+
+const _env = envSchema.safeParse(process.env);
+
+if (_env.success === false) {
+    throw new AppError("Invalid enviroments variable");
 }
 
-export const env = {
-  jwt: {
-    accessSecret: getEnvVar("JWT_ACCESS_SECRET"),
-    refreshSecret: getEnvVar("JWT_REFRESH_SECRET"),
-    accessExpiresIn: getEnvVar("ACCESS_EXPIRES_IN"),   // ex: "15m"
-    refreshExpiresIn: getEnvVar("REFRESH_EXPIRES_IN"), // ex: "7d"
-  },
-  port: process.env.PORT ? Number(process.env.PORT) : 8080,
-};
+export const env = _env.data;
