@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
 
 export function SideBar() {
   const menuItems = [
@@ -25,9 +26,9 @@ export function SideBar() {
     { icon: Store, label: "Lojas" },
     { icon: Settings, label: "Configurações" },
   ];
-
+  const { logout } = useAuth();
   return (
-    <div className="w-56 h-screen bg-gradient-to-b from-emerald-500 to-emerald-600 text-white flex flex-col fixed left-0 top-0">
+    <div className="w-56 h-screen bg-linear-to-b from-emerald-500 to-emerald-600 text-white flex flex-col fixed left-0 top-0">
       {/* Logo/Brand */}
       <div className="p-6 border-b border-emerald-400">
         <h1 className="text-2xl font-bold">Next Flow PDV</h1>
@@ -54,7 +55,10 @@ export function SideBar() {
 
       {/* Botão Sair */}
       <div className="p-4 border-t border-emerald-400">
-        <button className="w-full flex items-center justify-center gap-3 px-6 py-3 cursor-pointer bg-emerald-400 bg-opacity-50 rounded-lg transition-all duration-300 hover:scale-105 hover:bg-opacity-70 hover:shadow-lg">
+        <button
+          className="w-full flex items-center justify-center gap-3 px-6 py-3 cursor-pointer bg-emerald-400 bg-opacity-50 rounded-lg transition-all duration-300 hover:scale-105 hover:bg-opacity-70 hover:shadow-lg"
+          onClick={logout}
+        >
           <LogOut size={20} />
           <span className="font-medium">Sair</span>
         </button>

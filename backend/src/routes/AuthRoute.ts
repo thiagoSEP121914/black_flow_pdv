@@ -1,5 +1,5 @@
 import { Router } from "express";
-// middlewares ,token jwt autenticação por role
+import { userController } from "../features/user/index.js";
 
 class AuthRouter {
     private router: Router;
@@ -9,6 +9,7 @@ class AuthRouter {
     }
 
     routes() {
+        this.router.use("/users", userController.handle());
         return this.router;
     }
 }

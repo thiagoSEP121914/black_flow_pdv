@@ -1,4 +1,4 @@
-import { generateAccessToken, generateRefreshToken } from "../../middlewares/authToken.js";
+import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
 import { Request } from "express";
 import { UserService } from "../user/UserService.js";
 import { CompanyService } from "../company/CompanyService.js";
@@ -82,23 +82,6 @@ export class AuthService {
         const createdAt = new Date().toISOString();
         return { accessToken, refreshToken, expireIn: "1h", createdAt };
     }
-
-    private async createSession(userId: string, token: string, req: Request) {
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7);
-
-        await prisma.session.create({
-            data: {
-                token,
-                userId,
-                companyId: (await this.userService.findById(userId)).companyId,
-                expiresAt,
-                userAgent: req.headers["user-agent"],
-                ipAddress: req.ip,
-            },
-        });
-    }
-
     async logout(refreshToken: string) {
         await prisma.session.deleteMany({
             where: {
@@ -134,5 +117,21 @@ export class AuthService {
             accessToken,
             expireIn: "1h",
         };
+    }
+
+    private async createSession(userId: string, token: string, req: Request) {
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+
+        await prisma.session.create({
+            data: {
+                token,
+                userId,
+                companyId: (await this.userService.findById(userId)).companyId,
+                expiresAt,
+                userAgent: req.headers["user-agent"],
+                ipAddress: req.ip,
+            },
+        });
     }
 }

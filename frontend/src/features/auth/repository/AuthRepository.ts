@@ -1,14 +1,5 @@
 import { api } from "@/shared/api";
-
-interface LoginResponse {
-  token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-}
+import type { LoginResponse, User } from "../types/LoginResponse";
 
 export class AuthRepository {
   async login(email: string, password: string): Promise<LoginResponse> {
@@ -22,5 +13,10 @@ export class AuthRepository {
 
   async logout() {
     await api.post("/unauth/logout");
+  }
+
+  async me(): Promise<User> {
+    const { data } = await api.get<User>("/auth/users/me");
+    return data;
   }
 }
