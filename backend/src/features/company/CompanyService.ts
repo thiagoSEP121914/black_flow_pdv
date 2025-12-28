@@ -1,4 +1,7 @@
-import prisma from "../../core/prisma.js";
+import { Company } from "@prisma/client";
+import { ICompanyRepository } from "./repositories/ICompanyRepository.js";
+import { SearchOutPut } from "../../core/interface/IRepository.js";
+import { NotFoundError } from "../../errors/NotFounError.js";
 
 export interface CreateCompanyDTO {
     name: string;
@@ -19,167 +22,41 @@ export interface UpdateCompanyDTO {
 }
 
 export class CompanyService {
-    async createCompany(data: CreateCompanyDTO) {
-        const company = await prisma.company.create({
-            data: {
-                name: data.name,
-                cnpj: data.cnpj,
-                phone: data.phone,
-                email: data.email,
-                address: data.address,
-                status: data.status || "active",
-            },
-            include: {
-                users: true,
-                stores: true,
-            },
-        });
+    private repository: ICompanyRepository;
 
+    constructor(repository: ICompanyRepository) {
+        this.repository = repository;
+    }
+
+    async findAll(params: { page?: number; per_page?: number }): Promise<SearchOutPut<Company>> {
+        return this.repository.findAll(params);
+    }
+
+    async findById(id: string): Promise<Company> {
+        const company = await this.repository.findById(id);
+        if (!company) throw new NotFoundError("Empresa não encontrada");
         return company;
     }
 
-    async getAllCompanies() {
-        return await prisma.company.findMany({
-            include: {
-                users: {
-                    where: { active: true },
-                },
-                stores: {
-                    where: { status: "active" },
-                },
-                _count: {
-                    select: {
-                        stores: true,
-                        users: true,
-                        financialItems: true,
-                    },
-                },
-            },
-            orderBy: {
-                name: "asc",
-            },
-        });
+    async findByCnpj(cnpj: string): Promise<Company> {
+        const company = await this.repository.findByCnpj(cnpj);
+        if (!company) throw new NotFoundError("Empresa não encontrada");
+        return company;
     }
 
-    async getCompanyById(id: string) {
-        return await prisma.company.findUnique({
-            where: { id },
-            include: {
-                users: {
-                    where: { active: true },
-                },
-                stores: true,
-                financialItems: {
-                    orderBy: { date: "desc" },
-                    take: 10,
-                },
-            },
-        });
+    async save(data: CreateCompanyDTO): Promise<Company> {
+        return this.repository.insert(data);
     }
 
-    async updateCompany(id: string, data: UpdateCompanyDTO) {
-        return await prisma.company.update({
-            where: { id },
-            data,
-            include: {
-                users: true,
-                stores: true,
-            },
-        });
+    async update(id: string, data: UpdateCompanyDTO): Promise<Company> {
+        const company = await this.repository.findById(id);
+        if (!company) throw new NotFoundError("Empresa não encontrada");
+        return this.repository.update({ ...company, ...data });
     }
 
-    async deleteCompany(id: string) {
-        // Soft delete: apenas desativa
-        return await prisma.company.update({
-            where: { id },
-            data: { status: "inactive" },
-        });
-    }
-
-    async hardDeleteCompany(id: string) {
-        // Delete físico (cuidado com as relações em cascata!)
-        return await prisma.company.delete({
-            where: { id },
-        });
-    }
-
-    async getCompanyStats(companyId: string) {
-        const [company, totalStores, activeStores, totalOwners, financialSummary] = await Promise.all([
-            prisma.company.findUnique({
-                where: { id: companyId },
-                select: {
-                    id: true,
-                    name: true,
-                    status: true,
-                },
-            }),
-            prisma.store.count({
-                where: { companyId },
-            }),
-            prisma.store.count({
-                where: {
-                    companyId,
-                    status: "active",
-                },
-            }),
-            prisma.user.count({
-                where: {
-                    companyId,
-                    active: true,
-                },
-            }),
-            prisma.financial.groupBy({
-                by: ["type"],
-                where: { companyId },
-                _sum: {
-                    amount: true,
-                },
-            }),
-        ]);
-
-        return {
-            company,
-            totalStores,
-            activeStores,
-            totalOwners,
-            financialSummary,
-        };
-    }
-
-    async getCompaniesByStatus(status: string) {
-        return await prisma.company.findMany({
-            where: { status },
-            include: {
-                _count: {
-                    select: {
-                        stores: true,
-                        users: true,
-                    },
-                },
-            },
-        });
-    }
-
-    async searchCompanies(searchTerm: string) {
-        return await prisma.company.findMany({
-            where: {
-                OR: [
-                    { name: { contains: searchTerm, mode: "insensitive" } },
-                    { cnpj: { contains: searchTerm } },
-                    { email: { contains: searchTerm, mode: "insensitive" } },
-                ],
-            },
-            include: {
-                _count: {
-                    select: {
-                        stores: true,
-                        users: true,
-                    },
-                },
-            },
-        });
+    async delete(id: string): Promise<void> {
+        const company = await this.repository.findById(id);
+        if (!company) throw new NotFoundError("Empresa não encontrada");
+        await this.repository.delete(id);
     }
 }
-
-const companyService = new CompanyService();
-export default companyService;

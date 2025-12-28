@@ -14,10 +14,13 @@ interface LoginDTO {
     password: string;
 }
 
-const authService = new AuthService();
-
 export class AuthController extends Controller {
-    private authService = new AuthService();
+    private authService: AuthService;
+
+    constructor(authService: AuthService) {
+        super();
+        this.authService = authService;
+    }
 
     handle() {
         this.route.post("/signup", async (req: Request, res: Response) => {
@@ -70,7 +73,7 @@ export class AuthController extends Controller {
                 const { refreshToken } = req.body;
                 if (!refreshToken) return res.status(400).json({ error: "Refresh token is required" });
 
-                const result = await this.authService.logout(refreshToken);
+                const result = await this.authService.logout( refreshToken);
                 return res.json(result);
             } catch (err: any) {
                 console.error(err);
@@ -81,6 +84,3 @@ export class AuthController extends Controller {
         return this.route;
     }
 }
-
-const authController = new AuthController();
-export default authController.handle();

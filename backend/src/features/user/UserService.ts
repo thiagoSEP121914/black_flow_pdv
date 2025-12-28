@@ -1,246 +1,104 @@
-import prisma from "../../core/prisma.js";
-import bcrypt from "bcryptjs";
+import { IUserRepository } from "./repositories/IUserRepository.js";
+import { NotFoundError } from "../../errors/NotFounError.js";
+import { env } from "../../core/env.js";
+import { ConflictError } from "../../errors/ConflictError.js";
+import { User } from "@prisma/client";
+import { hashPassword, comparePasword } from "../../utils/bcrypt.js";
+import { SearchOutPut } from "../../core/interface/IRepository.js";
 
-const SALT_ROUNDS = 10;
-
-export interface CreateUserDTO {
+export type CreateUserDTO = {
     email: string;
     password: string;
     name: string;
-    phone?: string;
+    phone?: string | null;
+    active: boolean;
+    avatar?: string | null;
     userType: "owner" | "operator";
-    companyId?: string;
-    storeId?: string;
-    role?: string;
-}
+    role?: string | null;
+    companyId: string;
+    storeId?: string | null;
+};
 
-export interface UpdateUserDTO {
+export type UpdateUserDTO = {
     name?: string;
     phone?: string;
     role?: string;
-}
+    password?: string;
+};
 
 export class UserService {
-    // ==================== CREATE ====================
-    async createUser(data: CreateUserDTO) {
-        const existingUser = await prisma.user.findFirst({
-            where: { email: data.email, active: true },
-        });
+    private repository: IUserRepository;
 
-        if (existingUser) {
-            throw new Error("This email is already active in another company");
+    constructor(repository: IUserRepository) {
+        this.repository = repository;
+    }
+
+    async findAll(params: {
+        companyId?: string;
+        storeId?: string;
+        page?: number;
+        per_page?: number;
+    }): Promise<SearchOutPut<User>> {
+        return this.repository.findAll(params);
+    }
+
+    async findById(id: string): Promise<User> {
+        const user = await this.repository.findById(id);
+        if (!user) throw new NotFoundError("Usuário não encontrado");
+        return user;
+    }
+
+    async findByEmail(email: string): Promise<User> {
+        const user = await this.repository.findByEmail(email);
+        if (!user) {
+            throw new NotFoundError(`User with email ${email} not found`);
+        }
+        return user;
+    }
+
+    async existsByEmail(email: string, companyId?: string): Promise<boolean> {
+        return this.repository.existsByEmail(email);
+    }
+
+    async save(data: CreateUserDTO): Promise<Partial<User>> {
+        const emailExists = await this.repository.existsByEmail(data.email, data.companyId);
+        if (emailExists) throw new ConflictError("Email já está em uso");
+
+        const hashedPassword = await hashPassword(data.password);
+
+        const userToInsert = {
+            email: data.email.toLowerCase(),
+            password: hashedPassword,
+            name: data.name,
+            phone: data.phone ?? null,
+            avatar: data.avatar ?? null,
+            userType: data.userType,
+            role: data.role ?? null,
+            companyId: data.companyId,
+            storeId: data.storeId ?? null,
+            active: true,
+        };
+
+        return this.repository.insert(userToInsert);
+    }
+
+    async update(id: string, data: UpdateUserDTO): Promise<Partial<User>> {
+        const user = await this.repository.findById(id);
+        if (!user) throw new NotFoundError("Usuário não encontrado");
+
+        let updatedData: any = { ...data };
+
+        if (data.password) {
+            updatedData.password = await hashPassword(data.password);
         }
 
-        if (data.userType === "owner" && !data.companyId) {
-            throw new Error("Company ID is required for owners");
-        }
-        if (data.userType === "operator") {
-            if (!data.storeId) throw new Error("Store ID is required for operators");
-            if (!data.role) throw new Error("Role is required for operators");
-        }
-
-        const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
-
-        const user = await prisma.user.create({
-            data: {
-                email: data.email,
-                password: hashedPassword,
-                name: data.name,
-                phone: data.phone,
-                userType: data.userType,
-                companyId: data.companyId,
-                storeId: data.storeId,
-                role: data.role,
-            },
-            include: {
-                company: data.userType === "owner" ? { select: { id: true, name: true, status: true } } : false,
-                store:
-                    data.userType === "operator"
-                        ? {
-                              select: {
-                                  id: true,
-                                  name: true,
-                                  status: true,
-                                  company: { select: { id: true, name: true } },
-                              },
-                          }
-                        : false,
-            },
-        });
-
-        const { password, ...userWithoutPassword } = user;
-        return userWithoutPassword;
+        return this.repository.update({ ...user, ...updatedData });
     }
 
-    async login(email: string, password: string) {
-        const user = await prisma.user.findFirst({
-            where: { email, active: true },
-            include: {
-                company: true,
-                store: { include: { company: true } },
-            },
-        });
+    async delete(id: string): Promise<void> {
+        const user = await this.repository.findById(id);
+        if (!user) throw new NotFoundError("Usuário não encontrado");
 
-        if (!user) throw new Error("User not found or inactive");
-
-        const isValid = await bcrypt.compare(password, user.password);
-        if (!isValid) throw new Error("Invalid password");
-
-        const { password: _, ...userData } = user;
-
-        return userData;
-    }
-
-    async getAllUsers() {
-        const users = await prisma.user.findMany({
-            include: {
-                company: { select: { id: true, name: true } },
-                store: { select: { id: true, name: true } },
-            },
-            orderBy: { name: "asc" },
-        });
-        return users.map(({ password, ...user }) => user);
-    }
-
-    async getUserById(id: string) {
-        const user = await prisma.user.findUnique({
-            where: { id },
-            include: {
-                company: true,
-                store: { include: { company: true } },
-            },
-        });
-        if (!user) return null;
-        const { password, ...userWithoutPassword } = user;
-        return userWithoutPassword;
-    }
-
-    async getUserByEmail(email: string) {
-        const user = await prisma.user.findFirst({
-            where: { email, active: true },
-            include: {
-                company: true,
-                store: { include: { company: true } },
-            },
-        });
-        if (!user) return null;
-        const { password, ...userWithoutPassword } = user;
-        return userWithoutPassword;
-    }
-
-    async getUsersByCompany(companyId: string) {
-        const users = await prisma.user.findMany({
-            where: { companyId, userType: "owner" },
-            include: { company: { select: { id: true, name: true } } },
-        });
-        return users.map(({ password, ...user }) => user);
-    }
-
-    async getUsersByStore(storeId: string) {
-        const users = await prisma.user.findMany({
-            where: { storeId, userType: "operator" },
-            include: {
-                store: {
-                    select: {
-                        id: true,
-                        name: true,
-                        company: { select: { id: true, name: true } },
-                    },
-                },
-            },
-        });
-        return users.map(({ password, ...user }) => user);
-    }
-
-    async getActiveUsersByStore(storeId: string) {
-        const users = await prisma.user.findMany({
-            where: { storeId, userType: "operator", active: true },
-        });
-        return users.map(({ password, ...user }) => user);
-    }
-
-    async searchUsers(searchTerm: string) {
-        const users = await prisma.user.findMany({
-            where: {
-                OR: [
-                    { name: { contains: searchTerm, mode: "insensitive" } },
-                    { email: { contains: searchTerm, mode: "insensitive" } },
-                    { phone: { contains: searchTerm } },
-                ],
-            },
-            include: {
-                company: { select: { id: true, name: true } },
-                store: { select: { id: true, name: true } },
-            },
-        });
-        return users.map(({ password, ...user }) => user);
-    }
-
-    async getUsersByType(userType: "owner" | "operator") {
-        const users = await prisma.user.findMany({
-            where: { userType },
-            include: { company: userType === "owner" ? true : false, store: userType === "operator" ? true : false },
-        });
-        return users.map(({ password, ...user }) => user);
-    }
-
-    async getUsersByRole(role: string) {
-        const users = await prisma.user.findMany({
-            where: { userType: "operator", role },
-            include: { store: { select: { id: true, name: true } } },
-        });
-        return users.map(({ password, ...user }) => user);
-    }
-
-    async getUserStats(userId: string) {
-        const [user, totalSales, totalRevenue] = await Promise.all([
-            this.getUserById(userId),
-            prisma.sale.count({ where: { userId } }),
-            prisma.sale.aggregate({ where: { userId }, _sum: { total: true } }),
-        ]);
-        return { user, totalSales, totalRevenue: totalRevenue._sum.total || 0 };
-    }
-
-    async updateUser(id: string, data: UpdateUserDTO) {
-        const user = await prisma.user.update({
-            where: { id },
-            data,
-            include: { company: true, store: true },
-        });
-        const { password, ...userWithoutPassword } = user;
-        return userWithoutPassword;
-    }
-
-    async updatePassword(id: string, newPassword: string) {
-        const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
-        await prisma.user.update({ where: { id }, data: { password: hashedPassword } });
-        return { message: "Password updated successfully" };
-    }
-
-    async activateUser(id: string) {
-        const user = await prisma.user.findUnique({ where: { id } });
-        if (!user) throw new Error("User not found");
-
-        await prisma.user.updateMany({
-            where: { email: user.email, active: true },
-            data: { active: false },
-        });
-
-        const updatedUser = await prisma.user.update({ where: { id }, data: { active: true } });
-        const { password, ...userWithoutPassword } = updatedUser;
-        return userWithoutPassword;
-    }
-
-    async deactivateUser(id: string) {
-        const updatedUser = await prisma.user.update({ where: { id }, data: { active: false } });
-        const { password, ...userWithoutPassword } = updatedUser;
-        return userWithoutPassword;
-    }
-
-    async deleteUser(id: string) {
-        return prisma.user.delete({ where: { id } });
+        await this.repository.delete(id);
     }
 }
-
-const userService = new UserService();
-export default userService;

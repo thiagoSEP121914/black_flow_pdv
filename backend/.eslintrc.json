@@ -12,6 +12,27 @@
     "plugins": ["@typescript-eslint"],
     "rules": {
         "@typescript-eslint/explicit-module-boundary-types": "off",
-        "@typescript-eslint/no-explicit-any": "off"
+        "@typescript-eslint/no-explicit-any": "off",
+
+        // 🔥 LINHAS ENTRE BLOCOs
+        "padding-line-between-statements": [
+            "error",
+            // sempre linha em branco antes de return
+            { "blankLine": "always", "prev": "*", "next": "return" },
+
+            // sempre linha em branco antes e depois de if
+            { "blankLine": "always", "prev": "*", "next": "if" },
+            { "blankLine": "always", "prev": "if", "next": "*" },
+
+            // sempre linha em branco antes e depois de loops
+            { "blankLine": "always", "prev": "*", "next": "for" },
+            { "blankLine": "always", "prev": "for", "next": "*" },
+            { "blankLine": "always", "prev": "*", "next": "while" },
+            { "blankLine": "always", "prev": "while", "next": "*" },
+
+            // sempre linha em branco entre declarações de função
+            { "blankLine": "always", "prev": "*", "next": "function" },
+            { "blankLine": "always", "prev": "function", "next": "*" }
+        ]
     }
 }

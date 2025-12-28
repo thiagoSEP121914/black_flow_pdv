@@ -1,7 +1,12 @@
-import prisma from "../../core/prisma.js";
-import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../../middlewares/authToken.js";
 import { Request } from "express";
+import { UserService } from "../user/UserService.js";
+import { CompanyService } from "../company/CompanyService.js";
+import { UnauthorizedError } from "../../errors/UnauthorizedError.js";
+import { NotFoundError } from "../../errors/NotFounError.js";
+import { comparePasword, hashPassword } from "../../utils/bcrypt.js";
+import { prisma } from "../../core/prisma.js";
+import { PrismaClient } from "@prisma/client/extension";
 
 type SignupDTO = {
     email: string;
@@ -23,114 +28,111 @@ type LoginResponseDTO = {
 };
 
 export class AuthService {
-    async signupOwner(data: SignupDTO) {
-        const hashedPassword = await bcrypt.hash(data.password, 10);
+    private userService: UserService;
+    private companyService: CompanyService;
+    prisma: PrismaClient;
 
-        const company = await prisma.company.create({
-            data: {
-                name: data.companyName,
-                status: "active",
-            },
+    constructor(userService: UserService, companyService: CompanyService) {
+        this.userService = userService;
+        this.companyService = companyService;
+        this.prisma = prisma;
+    }
+
+    async signupOwner(data: SignupDTO) {
+        const company = await this.companyService.save({
+            name: data.companyName,
+            status: "active",
         });
 
-        const user = await prisma.user.create({
-            data: {
-                email: data.email,
-                password: hashedPassword,
-                name: data.name,
-                userType: "owner",
-                companyId: company.id,
-                active: true,
-            },
+        const user = await this.userService.save({
+            email: data.email,
+            password: data.password,
+            name: data.name,
+            userType: "owner",
+            companyId: company.id,
+            active: true,
         });
 
         return { company, user };
     }
 
-    async loginUser(data: LoginDTO, req: Request): Promise<LoginResponseDTO> {
-        const user = await prisma.user.findFirst({
-            where: { email: data.email, active: true },
-            select: {
-                id: true,
-                email: true,
-                password: true,
-                name: true,
-                userType: true,
-                companyId: true,
-                storeId: true,
-                role: true,
-            },
-        });
+    async loginUser(data: LoginDTO, req: Request) {
+        const user = await this.userService.findByEmail(data.email);
 
-        if (!user) throw new Error("Invalid credentials");
-
-        const isValid = await bcrypt.compare(data.password, user.password);
-        if (!isValid) throw new Error("Invalid credentials");
-
-        if (!user.companyId) {
-            throw new Error("User does not have a company associated");
+        if (!user) {
+            throw new NotFoundError("User not found");
         }
+
+        if (!user.active) {
+            throw new UnauthorizedError("User does not have authorization");
+        }
+
+        const isValid = await comparePasword(data.password, user.password);
+        if (!isValid) throw new UnauthorizedError("Invalid credentials"); // 401
 
         const accessToken = generateAccessToken({
             id: user.id,
             email: user.email,
             userType: user.userType as "owner" | "operator",
             companyId: user.companyId,
-            storeId: user.storeId || undefined,
-            role: user.role || undefined,
         });
-
         const refreshToken = generateRefreshToken({ id: user.id });
-        const createdAt = new Date();
+        await this.createSession(user.id, refreshToken, req);
+
+        const createdAt = new Date().toISOString();
+        return { accessToken, refreshToken, expireIn: "1h", createdAt };
+    }
+
+    private async createSession(userId: string, token: string, req: Request) {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7);
 
         await prisma.session.create({
             data: {
-                token: refreshToken,
-                userId: user.id,
-                companyId: user.companyId,
+                token,
+                userId,
+                companyId: (await this.userService.findById(userId)).companyId,
                 expiresAt,
                 userAgent: req.headers["user-agent"],
                 ipAddress: req.ip,
             },
         });
+    }
+
+    async logout(refreshToken: string) {
+        await prisma.session.deleteMany({
+            where: {
+                token: refreshToken,
+            },
+        });
+
+        return { message: "User logged out successfully" };
+    }
+
+    async refreshToken(refreshToken: string) {
+        const session = await prisma.session.findUnique({
+            where: { token: refreshToken },
+            include: { user: true },
+        });
+
+        if (!session) {
+            throw new UnauthorizedError("Invalid refresh token");
+        }
+
+        if (session.expiresAt < new Date()) {
+            throw new UnauthorizedError("Refresh token expired");
+        }
+
+        const accessToken = generateAccessToken({
+            id: session.user.id,
+            email: session.user.email,
+            userType: session.user.userType as "owner" | "operator",
+            companyId: session.companyId,
+        });
 
         return {
             accessToken,
-            refreshToken,
-            createdAt: createdAt.toISOString(),
-            expireIn: expiresAt.toISOString(),
+            expireIn: "1h",
         };
-    }
-
-    // ------------------- REFRESH TOKEN -------------------
-    async refreshToken(token: string): Promise<{ accessToken: string }> {
-        const session = await prisma.session.findUnique({
-            where: { token },
-        });
-
-        if (!session || session.expiresAt < new Date()) {
-            throw new Error("Invalid or expired session");
-        }
-
-        const user = await prisma.user.findUnique({ where: { id: session.userId } });
-        if (!user) throw new Error("User not found");
-
-        const accessToken = generateAccessToken({
-            id: user.id,
-            email: user.email,
-            userType: user.userType as "owner" | "operator",
-            companyId: user.companyId,
-            storeId: user.storeId || undefined,
-            role: user.role || undefined,
-        });
-
-        return { accessToken };
-    }
-
-    async logout(token: string) {
-        await prisma.session.deleteMany({ where: { token } });
-        return { message: "Logged out successfully" };
     }
 }
