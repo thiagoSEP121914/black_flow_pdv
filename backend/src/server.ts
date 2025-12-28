@@ -5,6 +5,7 @@ import cors from "cors";
 import { logger } from "./utils/logger.js";
 import pinoHttpModule from "pino-http";
 import { env } from "./core/env.js";
+import { errorHandler } from "./middlewares/ErrorHandler.js";
 
 config();
 const server = express();
@@ -19,6 +20,7 @@ server.get("/", (req, res) => {
 });
 
 server.use("/", router);
+server.use(errorHandler);
 
 server.listen(PORT, () => {
     logger.info(`Server is running on the PORT: ${PORT}`);

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authController } from "../features/auth/index.js";
+import { userController } from "../features/user/index.js";
 
 class AuthRouter {
     private router: Router;
@@ -9,7 +9,7 @@ class AuthRouter {
     }
 
     routes() {
-        this.router.use("/user", authController.handle());
+        this.router.use("/users", userController.handle());
         return this.router;
     }
 }

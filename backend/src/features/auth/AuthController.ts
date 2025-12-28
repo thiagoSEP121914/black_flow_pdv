@@ -24,61 +24,39 @@ export class AuthController extends Controller {
 
     handle() {
         this.route.post("/signup", async (req: Request, res: Response) => {
-            try {
-                const data = req.body as SignupDTO;
-                const result = await this.authService.signupOwner(data);
+            const data = req.body as SignupDTO;
+            const result = await this.authService.signupOwner(data);
 
-                return res.status(201).json({
-                    message: "Owner account created",
-                    company: result.company,
-                    user: {
-                        id: result.user.id,
-                        email: result.user.email,
-                        name: result.user.name,
-                        userType: result.user.userType,
-                    },
-                });
-            } catch (err: any) {
-                console.error(err);
-                return res.status(500).json({ error: err.message || "Internal server error" });
-            }
+            return res.status(201).json({
+                message: "Owner account created",
+                company: result.company,
+                user: {
+                    id: result.user.id,
+                    email: result.user.email,
+                    name: result.user.name,
+                    userType: result.user.userType,
+                },
+            });
         });
 
         this.route.post("/login", async (req: Request, res: Response) => {
-            try {
-                const data = req.body as LoginDTO;
-                const result = await this.authService.loginUser(data, req);
-                return res.json(result);
-            } catch (err: any) {
-                console.error(err);
-                return res.status(401).json({ error: err.message || "Invalid credentials" });
-            }
+            const data = req.body as LoginDTO;
+            const result = await this.authService.loginUser(data, req);
+            return res.json(result);
         });
 
         this.route.post("/refresh", async (req: Request, res: Response) => {
-            try {
-                const { refreshToken } = req.body;
-                if (!refreshToken) return res.status(400).json({ error: "Refresh token is required" });
-
-                const result = await this.authService.refreshToken(refreshToken);
-                return res.json(result);
-            } catch (err: any) {
-                console.error(err);
-                return res.status(401).json({ error: err.message || "Invalid or expired refresh token" });
-            }
+            const { refreshToken } = req.body;
+            if (!refreshToken) return res.status(400).json({ error: "Refresh token is required" });
+            const result = await this.authService.refreshToken(refreshToken);
+            return res.json(result);
         });
 
         this.route.post("/logout", async (req: Request, res: Response) => {
-            try {
-                const { refreshToken } = req.body;
-                if (!refreshToken) return res.status(400).json({ error: "Refresh token is required" });
-
-                const result = await this.authService.logout( refreshToken);
-                return res.json(result);
-            } catch (err: any) {
-                console.error(err);
-                return res.status(500).json({ error: err.message || "Internal server error" });
-            }
+            const { refreshToken } = req.body;
+            if (!refreshToken) return res.status(400).json({ error: "Refresh token is required" });
+            const result = await this.authService.logout(refreshToken);
+            return res.json(result);
         });
 
         return this.route;
