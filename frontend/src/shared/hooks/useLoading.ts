@@ -1,17 +1,16 @@
 import { useState, useCallback } from "react";
 
-interface UseLoadingReturn {
-  isLoading: boolean;
-  setIsLoading: (value: boolean) => void;
-  startLoading: () => void;
-  stopLoading: () => void;
+export function useLoading() {
+  const [loading, setLoading] = useState(false);
+
+  const wrap = useCallback(async <T,>(fn: () => Promise<T>): Promise<T> => {
+    setLoading(true);
+    try {
+      return await fn();
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { loading, setLoading, wrap } as const;
 }
-
-export const useLoading = (initialState = false): UseLoadingReturn => {
-  const [isLoading, setIsLoading] = useState(initialState);
-
-  const startLoading = useCallback(() => setIsLoading(true), []);
-  const stopLoading = useCallback(() => setIsLoading(false), []);
-
-  return { isLoading, setIsLoading, startLoading, stopLoading };
-};

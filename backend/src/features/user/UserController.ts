@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { Controller } from "../../core/Controller.js";
 import { UserService } from "./UserService.js";
 
@@ -11,7 +11,9 @@ export class UserController extends Controller {
     }
 
     handle(): Router {
-        this.route.get("/", (req, res) => {});
+        this.route.get("/me", (req: Request, res: Response) => {
+            
+        });
         return this.route;
     }
 }

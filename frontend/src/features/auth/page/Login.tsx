@@ -4,11 +4,12 @@ import {
   loginSchema,
   type LoginInput,
 } from "@/features/auth/schemas/login.schema";
-import { loginUseCase } from "@/features/auth/useCases";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../shared/hooks/useAuth";
 
 export function Login() {
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const {
@@ -21,10 +22,13 @@ export function Login() {
 
   const onSubmit = async (data: LoginInput) => {
     try {
-      await loginUseCase.execute(data);
+      const response = await login(data); // ou login retorna void, então use user direto do context depois
+      console.log("LOGIN RESPONSE:", response);
+      console.log("USER AFTER LOGIN:", response); // verá se state atualizou
       toast.success("Login realizado com sucesso!");
       navigate("/dashboard");
     } catch (err) {
+      console.error("Erro login:", err);
       toast.error(`Erro ao fazer login ${err}`);
     }
   };

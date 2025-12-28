@@ -27,7 +27,7 @@ export function SideBar() {
   ];
 
   return (
-    <div className="w-56 h-screen bg-gradient-to-b from-emerald-500 to-emerald-600 text-white flex flex-col fixed left-0 top-0">
+    <div className="w-56 h-screen bg-linear-to-b from-emerald-500 to-emerald-600 text-white flex flex-col fixed left-0 top-0">
       {/* Logo/Brand */}
       <div className="p-6 border-b border-emerald-400">
         <h1 className="text-2xl font-bold">Next Flow PDV</h1>

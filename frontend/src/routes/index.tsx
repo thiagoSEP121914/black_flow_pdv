@@ -5,15 +5,18 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Login, Dashboard, NotFound, SignUp } from "@/pages";
-import { useAuth } from "@/shared/hooks";
+import { useAuth } from "@/shared/hooks/useAuth";
 
 // Rota protegida
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/auth/login" replace />;
-  }
+  if (loading) {
+    console.error("carregando");
+  } // spinner opcional
+
+  if (!isAuthenticated) return <Navigate to="/auth/login" replace />;
+  console.log("ProtectedRoute:", { isAuthenticated, loading });
 
   return <>{children}</>;
 };

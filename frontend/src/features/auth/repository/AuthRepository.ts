@@ -1,14 +1,5 @@
 import { api } from "@/shared/api";
-
-interface LoginResponse {
-  token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-}
+import type { LoginResponse } from "../types/LoginResponse";
 
 export class AuthRepository {
   async login(email: string, password: string): Promise<LoginResponse> {
