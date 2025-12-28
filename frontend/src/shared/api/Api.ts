@@ -13,9 +13,9 @@ class Api {
 
   private initializeInterceptors() {
     this.client.interceptors.request.use((config) => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("accessToken");
 
-      if (token) {
+      if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
 

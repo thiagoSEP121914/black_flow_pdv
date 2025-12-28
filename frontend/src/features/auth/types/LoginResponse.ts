@@ -1,16 +1,15 @@
 export interface LoginResponse {
-  token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
+  accessToken: string;
+  refreshToken: string;
+  expireIn: string;
+  createdAt: string;
 }
 
 export interface User {
   id: string;
-  name: string;
   email: string;
-  role: string;
+  userType: string;
+  companyId: string;
+  name?: string;
+  role?: string;
 }

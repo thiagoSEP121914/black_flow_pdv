@@ -6,17 +6,18 @@ import {
 } from "react-router-dom";
 import { Login, Dashboard, NotFound, SignUp } from "@/pages";
 import { useAuth } from "@/shared/hooks/useAuth";
+import { toast } from "react-toastify";
 
 // Rota protegida
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
-
   if (loading) {
-    console.error("carregando");
-  } // spinner opcional
+    return toast.info("Loading");
+  }
 
-  if (!isAuthenticated) return <Navigate to="/auth/login" replace />;
-  console.log("ProtectedRoute:", { isAuthenticated, loading });
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/login" replace />;
+  }
 
   return <>{children}</>;
 };

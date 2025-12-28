@@ -4,31 +4,50 @@ import { AuthContext } from "./AuthContextData";
 import { AuthRepository } from "../repository/AuthRepository";
 import type { LoginInput } from "../schemas/login.schema";
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const authRepository = useMemo(() => new AuthRepository(), []);
-
-  // Inicializa o usuário do localStorage
-  useEffect(() => {
+  const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
-      } catch (err) {
-        console.warn("Erro ao ler usuário do localStorage:", err);
+        return JSON.parse(storedUser);
+      } catch {
+        return null;
       }
     }
-    setLoading(false);
+    return null;
+  });
+
+  const [loading, setLoading] = useState(!user);
+
+  const authRepository = useMemo(() => new AuthRepository(), []);
+
+  useEffect(() => {
+    // 3. Validação de segurança em background
+    const validateToken = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (token && !user) {
+        try {
+          const userData = await authRepository.me();
+          setUser(userData);
+        } catch (error) {
+          console.log(error);
+          logout();
+        }
+      }
+      setLoading(false);
+    };
+
+    validateToken();
   }, []);
 
   async function login(data: LoginInput) {
     const response = await authRepository.login(data.email, data.password);
+    localStorage.setItem("accessToken", response.accessToken);
+    localStorage.setItem("refreshToken", response.refreshToken);
 
-    localStorage.setItem("user", JSON.stringify(response.user));
-    localStorage.setItem("token", response.token);
+    const user = await authRepository.me();
 
-    setUser(response.user);
+    localStorage.setItem("user", JSON.stringify(user));
+    setUser(user);
   }
 
   async function logout() {
@@ -36,7 +55,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await authRepository.logout();
     } finally {
       localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       setUser(null);
     }
   }

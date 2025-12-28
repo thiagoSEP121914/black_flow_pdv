@@ -13,7 +13,6 @@ export class UserController extends Controller {
 
     handle(): Router {
         this.route.get("/me", async (req: Request, res: Response) => {
-            logger.info(`[====] USERS DATA :ID: ${req.user.id}\n COMAPNY ID:${req.user.companyId}`);
             const userId = req.user?.id;
             const userCompanyId = req.user?.companyId;
 
