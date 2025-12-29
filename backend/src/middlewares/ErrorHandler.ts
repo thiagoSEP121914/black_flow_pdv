@@ -3,10 +3,18 @@ import { Request, Response, NextFunction } from "express";
 import { NotFoundError } from "../errors/NotFounError.js";
 import { ConflictError } from "../errors/ConflictError.js";
 import { logger } from "../utils/logger.js";
+import { UnauthorizedError } from "../errors/UnauthorizedError.js";
 
 export function errorHandler(error: any, req: Request, res: Response, _next: NextFunction) {
     // Loga todos os erros
     logger.error(error);
+
+    if (error instanceof UnauthorizedError) {
+        return res.status(401).json({
+            error: error.message,
+            code: "UNAUTHORIZED",
+        });
+    }
 
     if (error instanceof NotFoundError) {
         return res.status(404).json({
