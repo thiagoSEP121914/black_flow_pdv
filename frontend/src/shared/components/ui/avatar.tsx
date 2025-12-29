@@ -30,14 +30,14 @@ export const Avatar: React.FC<AvatarProps> = ({
       <img
         src={src}
         alt={alt}
-        className={`${sizeClass} rounded-full object-cover flex-shrink-0 ${className}`}
+        className={`${sizeClass} rounded-full object-cover shrink-0 ${className}`}
       />
     );
   }
 
   return (
     <div
-      className={`${sizeClass} ${bgColor} rounded-full flex items-center justify-center flex-shrink-0 text-white font-semibold ${className}`}
+      className={`${sizeClass} ${bgColor} rounded-full flex items-center justify-center shrink-0 text-white font-semibold ${className}`}
     >
       {initials}
     </div>
