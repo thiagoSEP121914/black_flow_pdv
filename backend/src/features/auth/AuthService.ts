@@ -4,7 +4,7 @@ import { UserService } from "../user/UserService.js";
 import { CompanyService } from "../company/CompanyService.js";
 import { UnauthorizedError } from "../../errors/UnauthorizedError.js";
 import { NotFoundError } from "../../errors/NotFounError.js";
-import { comparePasword, hashPassword } from "../../utils/bcrypt.js";
+import { comparePasword } from "../../utils/bcrypt.js";
 import { prisma } from "../../core/prisma.js";
 import { PrismaClient } from "@prisma/client/extension";
 
@@ -20,12 +20,14 @@ type LoginDTO = {
     password: string;
 };
 
+/*
 type LoginResponseDTO = {
     accessToken: string;
     refreshToken: string;
     expireIn: string;
     createdAt: string;
 };
+*/
 
 export class AuthService {
     private userService: UserService;
@@ -68,6 +70,7 @@ export class AuthService {
         }
 
         const isValid = await comparePasword(data.password, user.password);
+
         if (!isValid) throw new UnauthorizedError("Invalid credentials"); // 401
 
         const accessToken = generateAccessToken({
@@ -80,6 +83,7 @@ export class AuthService {
         await this.createSession(user.id, refreshToken, req);
 
         const createdAt = new Date().toISOString();
+
         return { accessToken, refreshToken, expireIn: "1h", createdAt };
     }
     async logout(refreshToken: string) {

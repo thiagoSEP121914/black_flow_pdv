@@ -19,11 +19,9 @@ type UserCreateData = {
 export class UserRepositoryImpl implements IUserRepository {
     private prisma: PrismaClient;
 
-
     constructor(prisma: PrismaClient) {
         this.prisma = prisma;
     }
-
 
     async findAll(params: SearchInput & { companyId?: string }): Promise<SearchOutPut<User>> {
         const { page, per_page, sort_by, sort_dir, filter, companyId } = params;
@@ -32,7 +30,9 @@ export class UserRepositoryImpl implements IUserRepository {
         const take = per_page ?? undefined;
 
         const where: any = {};
+
         if (companyId) where.companyId = companyId;
+
         if (filter) {
             where.OR = [
                 { name: { contains: filter, mode: "insensitive" } },
@@ -64,14 +64,13 @@ export class UserRepositoryImpl implements IUserRepository {
         };
     }
 
-
     async findById(id: string): Promise<User> {
         const user = await this.prisma.user.findUnique({
             where: { id },
         });
+
         return user;
     }
-
 
     async findByEmail(email: string, companyId?: string): Promise<User | null> {
         return await this.prisma.user.findFirst({
@@ -82,9 +81,9 @@ export class UserRepositoryImpl implements IUserRepository {
         });
     }
 
-
     async existsByEmail(email: string, companyId?: string): Promise<boolean> {
         const exist = await this.findByEmail(email, companyId);
+
         return exist ? true : false;
     }
 
@@ -99,7 +98,6 @@ export class UserRepositoryImpl implements IUserRepository {
         });
     }
 
-    
     async delete(id: string): Promise<void> {
         await this.prisma.user.update({
             where: { id },

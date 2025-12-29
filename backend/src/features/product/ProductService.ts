@@ -1,4 +1,4 @@
-import prisma from "../../core/prisma.js";
+import { prisma } from "../../core/prisma.js";
 
 // === DTOs ===
 
@@ -62,36 +62,52 @@ export class ProductService {
     /**
      * Cria um novo produto, incorporando dados da categoria (se existir).
      */
-    async createProduct(data: CreateProductDTO) {
+    async createProduct(companyId: string, data: CreateProductDTO) {
         const { categoryId, ...productData } = data;
-        let categoryFields = {};
+
+        let categoryFields: {
+            categoryName?: string;
+            categoryActive?: boolean;
+            categoryId?: string;
+        } = {};
 
         if (categoryId) {
             const category = await prisma.category.findUnique({
                 where: { id: categoryId },
-                select: { name: true, active: true },
+                select: {
+                    id: true,
+                    name: true,
+                    active: true,
+                },
             });
 
-            // Early return caso a categoria não seja encontrada (ou apenas ignora, dependendo da regra)
             if (!category) {
-                // Se a regra é permitir o produto sem categoria se o ID for inválido:
-                // console.warn(`Category ID ${categoryId} not found.`);
-                // Se a regra é FALHAR, você usaria: throw new Error("Category not found.");
-            } else {
-                // 1. Incorpora os campos de leitura rápida
-                categoryFields = {
-                    categoryName: category.name,
-                    categoryActive: category.active,
-                };
+                throw new Error("Category not found");
             }
+
+            categoryFields = {
+                categoryId: category.id,
+                categoryName: category.name,
+                categoryActive: category.active,
+            };
         }
 
         return prisma.product.create({
             data: {
-                ...productData, // Dados básicos do produto
-                ...categoryFields, // Dados incorporados da categoria
-                active: productData.active ?? true,
+                name: productData.name,
+                description: productData.description,
+                costPrice: productData.costPrice,
+                salePrice: productData.salePrice,
+                barcode: productData.barcode,
+                storeId: productData.storeId,
+
+                companyId, // ✅ OBRIGATÓRIO
+
                 quantity: productData.quantity ?? 0,
+                minStock: productData.minStock,
+                active: productData.active ?? true,
+
+                ...categoryFields,
             },
         });
     }
@@ -102,6 +118,7 @@ export class ProductService {
     async updateProduct(id: string, storeId: string, data: Partial<UpdateProductDTO>) {
         // Validação usando early return
         const existingProduct = await this.getProductById(id, storeId);
+
         if (!existingProduct) {
             throw new Error("Product not found in this store.");
         }

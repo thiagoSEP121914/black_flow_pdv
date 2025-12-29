@@ -4,7 +4,7 @@ import { NotFoundError } from "../errors/NotFounError.js";
 import { ConflictError } from "../errors/ConflictError.js";
 import { logger } from "../utils/logger.js";
 
-export function errorHandler(error: any, req: Request, res: Response, next: NextFunction) {
+export function errorHandler(error: any, req: Request, res: Response, _next: NextFunction) {
     // Loga todos os erros
     logger.error(error);
 

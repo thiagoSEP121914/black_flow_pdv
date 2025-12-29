@@ -17,6 +17,7 @@ export class CompanyRepositoryImpl implements ICompanyRepository {
         const take = per_page ?? undefined;
 
         const where: any = {};
+
         if (filter) {
             where.OR = [
                 { name: { contains: filter, mode: "insensitive" } },
@@ -68,6 +69,7 @@ export class CompanyRepositoryImpl implements ICompanyRepository {
 
     async update(model: Partial<Company>): Promise<Company> {
         if (!model.id) throw new Error("ID is required for update");
+
         return await this.prisma.company.update({
             where: { id: model.id },
             data: model,

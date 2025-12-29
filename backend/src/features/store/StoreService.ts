@@ -1,4 +1,4 @@
-import prisma from "../../core/prisma.js";
+import { prisma } from "../../core/prisma.js";
 
 export interface CreateStoreDTO {
     name: string;
@@ -27,6 +27,7 @@ export class StoreService {
                 status: "active",
             },
         });
+
         return store;
     }
 
@@ -59,6 +60,7 @@ export class StoreService {
         const store = await prisma.store.findFirst({
             where: { id: storeId, companyId },
         });
+
         return store;
     }
 

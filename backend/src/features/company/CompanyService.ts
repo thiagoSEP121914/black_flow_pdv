@@ -34,13 +34,17 @@ export class CompanyService {
 
     async findById(id: string): Promise<Company> {
         const company = await this.repository.findById(id);
+
         if (!company) throw new NotFoundError("Empresa não encontrada");
+
         return company;
     }
 
     async findByCnpj(cnpj: string): Promise<Company> {
         const company = await this.repository.findByCnpj(cnpj);
+
         if (!company) throw new NotFoundError("Empresa não encontrada");
+
         return company;
     }
 
@@ -50,13 +54,17 @@ export class CompanyService {
 
     async update(id: string, data: UpdateCompanyDTO): Promise<Company> {
         const company = await this.repository.findById(id);
+
         if (!company) throw new NotFoundError("Empresa não encontrada");
+
         return this.repository.update({ ...company, ...data });
     }
 
     async delete(id: string): Promise<void> {
         const company = await this.repository.findById(id);
+
         if (!company) throw new NotFoundError("Empresa não encontrada");
+
         await this.repository.delete(id);
     }
 }

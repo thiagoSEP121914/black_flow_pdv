@@ -15,13 +15,17 @@ export interface RefreshTokenPayload {
 
 function getAccessSecret(): string {
     const key = process.env.JWT_ACCESS_SECRET;
+
     if (!key) throw new Error("JWT_ACCESS_SECRET não definido no env");
+
     return key;
 }
 
 function getRefreshSecret(): string {
     const key = process.env.JWT_REFRESH_SECRET;
+
     if (!key) throw new Error("JWT_REFRESH_SECRET não definido no env");
+
     return key;
 }
 
