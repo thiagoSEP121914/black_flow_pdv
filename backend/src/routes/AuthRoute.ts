@@ -10,6 +10,7 @@ class AuthRouter {
 
     routes() {
         this.router.use("/users", userController.handle());
+
         return this.router;
     }
 }

@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
 import { env } from "../core/env.js";
-import { promises } from "dns";
 
 const SALT_ROUNDS = env.PASSWORD_ROUNDS;
 

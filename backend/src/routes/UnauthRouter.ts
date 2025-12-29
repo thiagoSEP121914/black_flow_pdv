@@ -10,7 +10,7 @@ class UnauthRouter {
 
     routes() {
         this.router.use("/", authController.handle());
-        
+
         return this.router;
     }
 }

@@ -1,7 +1,6 @@
 import { Router, Request, Response } from "express";
 import { Controller } from "../../core/Controller.js";
 import { UserService } from "./UserService.js";
-import { logger } from "../../utils/logger.js";
 
 export class UserController extends Controller {
     private service: UserService;
@@ -32,9 +31,11 @@ export class UserController extends Controller {
                 });
             }
 
-            const { password, ...userWithoutPassword } = user;
+            const { password: _password, ...userWithoutPassword } = user;
+
             return res.json(userWithoutPassword);
         });
+
         return this.route;
     }
 }

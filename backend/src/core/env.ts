@@ -1,6 +1,5 @@
 import { AppError } from "../errors/AppError.js";
 import "dotenv/config";
-import { logger } from "../utils/logger.js";
 import { z } from "zod";
 
 const envSchema = z.object({

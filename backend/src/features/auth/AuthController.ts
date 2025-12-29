@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Request, Response } from "express";
 import { AuthService } from "./AuthService.js";
 import { Controller } from "../../core/Controller.js";
 
@@ -42,20 +42,27 @@ export class AuthController extends Controller {
         this.route.post("/login", async (req: Request, res: Response) => {
             const data = req.body as LoginDTO;
             const result = await this.authService.loginUser(data, req);
+
             return res.json(result);
         });
 
         this.route.post("/refresh", async (req: Request, res: Response) => {
             const { refreshToken } = req.body;
+
             if (!refreshToken) return res.status(400).json({ error: "Refresh token is required" });
+
             const result = await this.authService.refreshToken(refreshToken);
+
             return res.json(result);
         });
 
         this.route.post("/logout", async (req: Request, res: Response) => {
             const { refreshToken } = req.body;
+
             if (!refreshToken) return res.status(400).json({ error: "Refresh token is required" });
+
             const result = await this.authService.logout(refreshToken);
+
             return res.json(result);
         });
 
