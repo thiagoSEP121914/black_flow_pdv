@@ -1,7 +1,7 @@
 import { Bell, Search } from "lucide-react";
-import { Input } from "@/shared/components/ui/input";
-import { Button } from "@/shared/components/ui/button";
-import { Avatar } from "@/shared/components/ui/avatar";
+import { Input } from "@/shared/components/ui/Input";
+import { Button } from "@/shared/components/ui/Button";
+import { Avatar } from "@/shared/components/ui/Avatar";
 
 interface HeaderProps {
   title: string;
