@@ -1,5 +1,4 @@
-import { AppRoutes } from "@/routes";
-import "./App.css";
+import { AppRoutes } from "@/shared/routes";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./features/auth/context/AuthContext";
 
