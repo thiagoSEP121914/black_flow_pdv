@@ -37,6 +37,8 @@ export const AppRoutes = () => {
   return (
     <Router>
       <Routes>
+        {/* Raiz*/}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         {/*Rotas Públicas */}
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/signup" element={<SignUp />} />
