@@ -6,13 +6,18 @@ import { logger } from "./utils/logger.js";
 import pinoHttpModule from "pino-http";
 import { env } from "./core/env.js";
 import { errorHandler } from "./middlewares/ErrorHandler.js";
+import helmet from "helmet";
 
 config();
 const server = express();
+server.use(helmet());
+
 const pinoHttp = pinoHttpModule.default;
 server.use(pinoHttp({ logger }));
 const PORT = env.PORT;
+
 server.use(cors());
+server.use();
 server.use(express.json());
 
 server.get("/", (req, res) => {

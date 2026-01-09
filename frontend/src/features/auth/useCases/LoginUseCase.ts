@@ -1,8 +1,10 @@
+/*
 import type { AuthRepository } from "../repository/AuthRepository";
 import {
   loginSchema,
   type LoginInput,
 } from "@/features/auth/schemas/login.schema";
+
 
 export class LoginUseCase {
   private authRepository: AuthRepository;
@@ -22,8 +24,8 @@ export class LoginUseCase {
     const { email, password } = parsed.data;
     const response = await this.authRepository.login(email, password);
 
-    localStorage.setItem("token", response.token);
-    localStorage.setItem("user", JSON.stringify(response.user));
+    localStorage.setItem("token", response.accessToken);
     return response.user;
   }
 }
+*/
