@@ -1,3 +1,4 @@
+//db.test.ts
 import { prisma } from "./core/prisma.js";
 import bcrypt from "bcryptjs";
 
