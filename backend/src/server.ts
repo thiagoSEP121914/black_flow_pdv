@@ -17,7 +17,6 @@ server.use(pinoHttp({ logger }));
 const PORT = env.PORT;
 
 server.use(cors());
-server.use();
 server.use(express.json());
 
 server.get("/", (req, res) => {
