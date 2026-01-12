@@ -51,7 +51,7 @@ export class ProductController extends Controller {
         this.route.get("/", async (req: Request, res: Response) => {
             try {
                 const { companyId } = (req as AuthenticateRequest).user;
-                const storeId = req.query.storeId as string;
+                const { storeId } = req.params;
 
                 if (!storeId) {
                     return res.status(400).json({ error: "storeId query parameter is required" });
@@ -113,7 +113,7 @@ export class ProductController extends Controller {
         this.route.put("/:id", async (req: Request, res: Response) => {
             try {
                 const { companyId } = (req as AuthenticateRequest).user;
-                const storeId = req.query.storeId as string;
+                const { storeId } = req.params;
                 const { id } = req.params;
 
                 // 🛑 CORREÇÃO APLICADA AQUI:
@@ -150,7 +150,7 @@ export class ProductController extends Controller {
         this.route.delete("/:id", async (req: Request, res: Response) => {
             try {
                 const { companyId } = (req as AuthenticateRequest).user;
-                const storeId = req.query.storeId as string;
+                const { storeId } = req.params;
                 const { id } = req.params;
 
                 if (!storeId) {

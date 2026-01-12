@@ -45,7 +45,7 @@ export class StoreController extends Controller {
         this.route.get("/:id", async (req: Request, res: Response) => {
             try {
                 const companyId = (req as AuthenticateRequest).user.companyId;
-                const storeId = req.params.id;
+                const storeId = req.params.id as string;
                 const store = await storeService.getStoreById(companyId, storeId);
 
                 if (!store) return res.status(404).json({ error: "Store not found" });
@@ -62,7 +62,7 @@ export class StoreController extends Controller {
         this.route.put("/:id", async (req: Request, res: Response) => {
             try {
                 const companyId = (req as AuthenticateRequest).user.companyId;
-                const storeId = req.params.id;
+                const storeId = req.params.id as string;
                 const data = req.body as UpdateStoreDTO;
                 const store = await storeService.updateStore(companyId, storeId, data);
 
@@ -81,7 +81,7 @@ export class StoreController extends Controller {
             try {
                 // ✅ Correção: Use 'Request' na assinatura e faça o cast aqui
                 const companyId = (req as AuthenticateRequest).user.companyId;
-                const storeId = req.params.id;
+                const storeId = req.params.id as string;
                 const result = await storeService.deleteStore(companyId, storeId);
 
                 if (!result) return res.status(404).json({ error: "Store not found for deletion" });
