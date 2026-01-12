@@ -1,4 +1,5 @@
 // src/features/product/ProductController.ts
+/*
 import { Router, Request, Response } from "express";
 import { Controller } from "../../core/Controller.js";
 import { productService, CreateProductDTO, UpdateProductDTO } from "./ProductService.js";
@@ -75,10 +76,7 @@ export class ProductController extends Controller {
             }
         });
 
-        /**
-         * Obter um produto específico
-         * Requer 'storeId' na query string (?storeId=...)
-         */
+       
         this.route.get("/:id", async (req: Request, res: Response) => {
             try {
                 const { companyId } = (req as AuthenticateRequest).user;
@@ -179,3 +177,4 @@ export class ProductController extends Controller {
 }
 const productController = new ProductController();
 export default productController.handle();
+*/

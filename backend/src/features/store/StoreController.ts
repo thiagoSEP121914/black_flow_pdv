@@ -1,3 +1,4 @@
+/*
 import { Router, Request, Response } from "express";
 import { Controller } from "../../core/Controller.js";
 import { storeService, CreateStoreDTO, UpdateStoreDTO } from "./StoreService.js";
@@ -100,3 +101,4 @@ export class StoreController extends Controller {
 }
 
 export const storeController = new StoreController().handle();
+*/
