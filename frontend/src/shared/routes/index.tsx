@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { MainLayout } from "@/shared/layouts";
 import { Pos } from "@/features/pos/page/Pos";
 import { Product } from "@/features/product/page/Product";
-import { Categorie } from "@/features/categories/Categorie";
+import { Categorie } from "@/features/categories/page/Categorie";
 import { Client } from "@/features/clients/page/Client";
 import { Sale } from "@/features/sales/page/Sale";
 import { Cashier } from "@/features/cashier/page/Cashier";
