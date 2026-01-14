@@ -2,6 +2,7 @@ import { ProductTable } from "../components/ProductTable";
 import { ActionToolbar } from "@/shared/components/ActionToolBar/ActionTooBar";
 import { ExportToLayout } from "@/shared/components/ExportToLayout/ExportToLayout";
 import { useState } from "react";
+import { PageLayout } from "@/shared/layouts/PageLayout";
 
 interface IProduct {
   id: string;
@@ -16,7 +17,7 @@ interface IProduct {
 
 export function Product() {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   const allProducts: IProduct[] = [
     {
@@ -230,8 +231,8 @@ export function Product() {
   const paginatedProducts = allProducts.slice(startIndex, endIndex);
 
   return (
-    <div className="flex max-h-[80vh] flex-col p-6 bg-white rounded-lg shadow-sm m-4 overflow-hidden">
-      <ActionToolbar />
+    <PageLayout>
+      <ActionToolbar showFilter={true} addButtonTitle="Produto" />
       <div className="flex-1 overflow-auto min-h-0">
         <ProductTable
           products={paginatedProducts}
@@ -242,6 +243,6 @@ export function Product() {
         />
       </div>
       <ExportToLayout />
-    </div>
+    </PageLayout>
   );
 }

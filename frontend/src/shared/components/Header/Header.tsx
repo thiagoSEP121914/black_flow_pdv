@@ -1,6 +1,6 @@
 import { Bell, Search } from "lucide-react";
 import { Input } from "@/shared/components/ui/Input";
-import { Button } from "@/shared/components/ui/Button";
+import { IconButton } from "@/shared/components/ui/IconButton";
 import { Avatar } from "@/shared/components/ui/Avatar";
 
 interface HeaderProps {
@@ -10,8 +10,8 @@ interface HeaderProps {
 
 export const Header = ({ title, subtitle }: HeaderProps) => {
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
-      <div className="flex items-center justify-between px-8 py-3">
+    <header className="sticky top-0 z-40 bg-white border-b border-gray-200 h-24 flex items-center">
+      <div className="flex items-center justify-between px-8 w-full">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
           {subtitle && <p className="text-gray-500 text-sm mt-1">{subtitle}</p>}
@@ -28,14 +28,16 @@ export const Header = ({ title, subtitle }: HeaderProps) => {
           </div>
 
           {/* Notifications */}
-          <Button
+          <IconButton
+            icon={
+              <>
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
+              </>
+            }
             variant="ghost"
-            size="icon"
             className="relative text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-          </Button>
+          />
 
           {/* User */}
           <div className="flex items-center gap-3 pl-6 border-l border-gray-200">

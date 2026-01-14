@@ -29,7 +29,7 @@ export function Table<T>({
   className = "",
   emptyMessage = "Nenhum dado encontrado.",
   totalItems,
-  itemsPerPage = 10,
+  itemsPerPage = 5,
   currentPage = 1,
   onPageChange,
   label = "itens",
@@ -44,7 +44,7 @@ export function Table<T>({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`text-left py-2 px-3 text-[10px] font-semibold text-gray-600 bg-transparent ${column.className || ""}`}
+                  className={`text-left py-4 px-3 text-sm font-semibold text-gray-600 bg-transparent ${column.className || ""}`}
                 >
                   {column.header}
                 </th>
@@ -56,7 +56,7 @@ export function Table<T>({
               Array.from({ length: itemsPerPage }).map((_, index) => (
                 <tr key={`skeleton-${index}`}>
                   {columns.map((column) => (
-                    <td key={`skeleton-${column.key}`} className="py-2 px-3">
+                    <td key={`skeleton-${column.key}`} className="py-4 px-3">
                       <div className="h-3 bg-gray-200 rounded animate-pulse" />
                     </td>
                   ))}
@@ -76,14 +76,13 @@ export function Table<T>({
                 <tr
                   key={index}
                   onClick={() => onRowClick?.(item)}
-                  className={`hover:bg-gray-100 transition-colors ${
-                    onRowClick ? "cursor-pointer" : ""
-                  }`}
+                  className={`hover:bg-gray-100 transition-colors ${onRowClick ? "cursor-pointer" : ""
+                    }`}
                 >
                   {columns.map((column) => (
                     <td
                       key={column.key}
-                      className={`py-2 px-3 text-[10px] text-gray-700 ${column.className || ""}`}
+                      className={`py-4 px-3 text-sm text-gray-700 ${column.className || ""}`}
                     >
                       {column.render
                         ? column.render(item)
@@ -100,7 +99,6 @@ export function Table<T>({
         <div className="w-full">
           <TablePagination
             totalItems={totalItems}
-            currentCount={data.length}
             itemsPerPage={itemsPerPage}
             currentPage={currentPage}
             onPageChange={onPageChange}

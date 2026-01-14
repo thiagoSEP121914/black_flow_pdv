@@ -1,5 +1,6 @@
 import { Table, type IColumn } from "@/shared/components/Table/Table";
 import { Edit, Trash2, AlertTriangle, Box } from "lucide-react";
+import { IconButton } from "@/shared/components/ui/IconButton";
 export interface IProduct {
   id: string;
   name: string;
@@ -72,9 +73,19 @@ export function ProductTable({
       header: "Ações",
       className: "text-right",
       render: () => (
-        <div className="flex justify-end gap-2 text-gray-400">
-          <Edit size={16} className="cursor-pointer hover:text-blue-600" />
-          <Trash2 size={16} className="cursor-pointer hover:text-red-600" />
+        <div className="flex justify-end gap-2">
+          <IconButton
+            icon={<Edit size={16} />}
+            variant="secondary"
+            size="sm"
+            onClick={() => console.log("Edit")}
+          />
+          <IconButton
+            icon={<Trash2 size={16} />}
+            variant="danger"
+            size="sm"
+            onClick={() => console.log("Delete")}
+          />
         </div>
       ),
     },
