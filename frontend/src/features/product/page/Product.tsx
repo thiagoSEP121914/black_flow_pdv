@@ -230,9 +230,9 @@ export function Product() {
   const paginatedProducts = allProducts.slice(startIndex, endIndex);
 
   return (
-    <div className="flex h-full flex-col p-6 bg-white rounded-lg shadow-sm m-4 overflow-hidden">
+    <div className="flex max-h-[80vh] flex-col p-6 bg-white rounded-lg shadow-sm m-4 overflow-hidden">
       <ActionToolbar />
-      <div className="overflow-auto">
+      <div className="flex-1 overflow-auto min-h-0">
         <ProductTable
           products={paginatedProducts}
           totalItems={allProducts.length}

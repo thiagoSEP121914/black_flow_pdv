@@ -11,7 +11,7 @@ export const SearchInput = ({ placeholder }: SearchInputProps) => {
       <input
         type="text"
         placeholder={placeholder}
-        className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+        className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 hover:bg-e focus:ring-emerald-500/20 focus:border-emerald-500"
       />
     </div>
   );

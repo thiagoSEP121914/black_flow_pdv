@@ -13,7 +13,10 @@ export const ActionToolbar = () => {
 
         <div className="flex gap-3">
           <FilterButton />
-          <Button className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer">
+          <Button
+            variant="primary"
+            className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer"
+          >
             <Plus className="w-4 h-4" />
             Novo Produto
           </Button>
