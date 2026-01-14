@@ -2,7 +2,6 @@ import { Button } from "@/shared/components/ui/Button.tsx";
 
 interface TablePaginationProps {
   totalItems: number;
-  currentCount: number;
   itemsPerPage?: number;
   currentPage?: number;
   label?: string;
@@ -12,7 +11,6 @@ interface TablePaginationProps {
 
 export function TablePagination({
   totalItems,
-  currentCount,
   itemsPerPage = 10,
   currentPage = 1,
   label = "registros",
@@ -23,22 +21,25 @@ export function TablePagination({
   const canPrev = currentPage > 1 && !isLoading;
   const canNext = currentPage < totalPages && !isLoading;
 
+  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
   return (
     <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 text-sm text-gray-500 font-medium">
       {isLoading ? (
         <div className="h-5 w-48 bg-gray-200 rounded animate-pulse" />
       ) : (
         <span>
-          Mostrando <span className="text-gray-900">{currentCount}</span> de{" "}
+          Mostrando <span className="text-gray-900">{startItem}</span> -{" "}
+          <span className="text-gray-900">{endItem}</span> de{" "}
           <span className="text-gray-900">{totalItems}</span> {label}
         </span>
       )}
-      <div className="flex gap-2">
+      <div className="flex gap-2 mr-2">
         <Button
           variant="outlined"
-          className={`h-9 px-4 text-xs font-semibold border-gray-200 hover:bg-gray-50 ${
-            !canPrev ? "text-gray-300 cursor-not-allowed" : "text-gray-700"
-          }`}
+          className={`h-9 px-4 text-xs font-semibold border-gray-200 hover:bg-gray-50 ${!canPrev ? "text-gray-300 cursor-not-allowed" : "text-gray-700"
+            }`}
           onClick={() => canPrev && onPageChange?.(currentPage - 1)}
           disabled={!canPrev}
         >
@@ -46,9 +47,8 @@ export function TablePagination({
         </Button>
         <Button
           variant="outlined"
-          className={`h-9 px-4 text-xs font-semibold border-gray-200 hover:bg-gray-50 ${
-            !canNext ? "text-gray-300 cursor-not-allowed" : "text-gray-900"
-          }`}
+          className={`h-9 px-4 text-xs font-semibold border-gray-200 hover:bg-gray-50 ${!canNext ? "text-gray-300 cursor-not-allowed" : "text-gray-900"
+            }`}
           onClick={() => canNext && onPageChange?.(currentPage + 1)}
           disabled={!canNext}
         >

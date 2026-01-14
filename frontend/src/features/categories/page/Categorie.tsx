@@ -57,10 +57,7 @@ const mockCategories = [
 export const Categorie = () => {
   return (
     <PageLayout>
-      {" "}
-      {/* Toolbar */}
       <ActionToolbar addButtonTitle="Categoria" />
-      {/* Grid de categorias */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {mockCategories.map((category) => (
           <CategorieCard

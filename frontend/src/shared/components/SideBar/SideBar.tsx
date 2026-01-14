@@ -33,7 +33,7 @@ export function SideBar() {
   return (
     <div className="w-56 h-screen bg-linear-to-b from-emerald-500 to-emerald-600 text-white flex flex-col fixed left-0 top-0">
       {/* Logo */}
-      <div className="p-6 border-b border-emerald-400">
+      <div className="h-24 flex flex-col justify-center px-6 border-b border-emerald-400">
         <h1 className="text-2xl font-bold">Next Flow PDV</h1>
         <p className="text-emerald-100 text-xs mt-1">
           Sistema de Gerenciamento
@@ -47,8 +47,7 @@ export function SideBar() {
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `w-full flex items-center gap-3 px-6 py-3 transition-all cursor-pointer hover:bg-emerald-400 hover:bg-opacity-20 text-emerald-50 ${
-                isActive ? "bg-emerald-600 bg-opacity-40" : ""
+              `w-full flex items-center gap-3 px-6 py-3 transition-all cursor-pointer hover:bg-emerald-400 hover:bg-opacity-20 text-emerald-50 ${isActive ? "bg-emerald-600 bg-opacity-40" : ""
               }`
             }
           >
