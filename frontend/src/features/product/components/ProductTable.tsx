@@ -1,6 +1,7 @@
 import { Table, type IColumn } from "@/shared/components/Table/Table";
 import { Edit, Trash2, AlertTriangle, Box } from "lucide-react";
 import { IconButton } from "@/shared/components/ui/IconButton";
+
 export interface IProduct {
   id: string;
   name: string;
