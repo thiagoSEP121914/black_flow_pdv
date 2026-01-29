@@ -1,5 +1,4 @@
 import { Tag, Package, Pencil, Trash2 } from "lucide-react";
-import { IconButton } from "@/shared/components/ui/IconButton";
 import { Button } from "@/shared/components/ui/Button";
 
 interface CategorieCardProps {
@@ -28,13 +27,33 @@ export const CategorieCard = ({
           <Tag className="h-5 w-5 text-emerald-500" />
         </div>
 
-        <span
-          className={`text-sm font-medium ${
-            isActive ? "text-emerald-600" : "text-gray-400"
-          }`}
-        >
-          {status}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`text-sm font-medium ${isActive ? "text-emerald-600" : "text-gray-400"
+              }`}
+          >
+            {status}
+          </span>
+
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 border-l border-gray-100 pl-2">
+            <Button
+              size="xs"
+              variant="ghost"
+              onClick={onEdit}
+              className="text-gray-400 hover:bg-emerald-500 hover:text-white transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
+            <Button
+              size="xs"
+              variant="ghost"
+              onClick={onDelete}
+              className="text-gray-400 hover:bg-red-500 hover:text-white transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="mt-4 space-y-1">
@@ -45,22 +64,6 @@ export const CategorieCard = ({
       <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
         <Package className="h-4 w-4" />
         <span>{productsCount} produtos</span>
-      </div>
-
-      <div className="mt-5 flex gap-3 opacity-0 translate-y-2 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0">
-        <Button
-          onClick={onEdit}
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600"
-        >
-          <Pencil className="h-4 w-4" />
-          Editar
-        </Button>
-
-        <IconButton
-          icon={<Trash2 className="h-4 w-4" />}
-          variant="danger"
-          onClick={onDelete}
-        />
       </div>
     </div>
   );
