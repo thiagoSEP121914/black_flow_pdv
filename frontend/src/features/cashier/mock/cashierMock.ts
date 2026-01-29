@@ -29,7 +29,7 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const nowIso = () => new Date().toISOString();
 
-let state: {
+const state: {
   isOpen: boolean;
   openedAt?: string;
   openingAmountCents?: number;
@@ -56,11 +56,7 @@ const calcSummary = (): CashSummary => {
     .filter((m) => m.type === "WITHDRAW")
     .reduce((acc, m) => acc + Math.abs(m.amountCents), 0);
 
-  const balance =
-    opening +
-    sales +
-    deposits -
-    withdrawals; // withdrawals já é absoluto acima
+  const balance = opening + sales + deposits - withdrawals; // withdrawals já é absoluto acima
 
   return {
     openedAt: state.openedAt ?? nowIso(),
@@ -120,7 +116,9 @@ export const cashierMock = {
   async getMovements(): Promise<CashMovement[]> {
     await wait(250);
     // mais recente primeiro
-    return [...state.movements].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    return [...state.movements].sort((a, b) =>
+      a.createdAt < b.createdAt ? 1 : -1,
+    );
   },
 
   async deposit(amountCents: number, reason?: string) {
