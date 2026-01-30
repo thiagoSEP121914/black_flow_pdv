@@ -144,181 +144,154 @@ export function Setting() {
   }
 
   return (
-    <div className="bg-slate-50 p-6 min-h-[calc(100vh-72px)]">
-      <div className="max-w-[1200px] mx-auto">
-        {/* HEADER (linha superior do F-pattern) */}
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <div>
-            <div className="text-2xl font-extrabold text-gray-900">Configurações</div>
-            <div className="text-sm text-gray-500">Personalize sua experiência</div>
+  <div className="bg-slate-50 p-6 min-h-[calc(100vh-72px)]">
+    <div className="max-w-[1200px] mx-auto">
+      {/* ✅ HEADER REMOVIDO: mantém apenas o Topbar global */}
+
+      {/* LAYOUT: sidebar interna + card conteúdo */}
+      <div className="grid grid-cols-[260px_1fr] gap-4 max-[980px]:grid-cols-1">
+        {/* SIDEBAR (coluna esquerda do F-pattern) */}
+        <Card title="Menu" icon={<Laptop className="w-4 h-4" />}>
+          <div className="p-3">
+            {filteredMenu.length === 0 ? (
+              <div className="text-sm text-gray-500 p-2">Nenhum item encontrado.</div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                {filteredMenu.map((item) => (
+                  <MenuItem
+                    key={item.key}
+                    active={active === item.key}
+                    label={item.label}
+                    icon={item.icon}
+                    onClick={() => setActive(item.key)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* CONTEÚDO (área principal) */}
+        <Card
+          title={sectionTitle(active)}
+          actions={
+            <Button
+              variant="primary"
+              className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white"
+              onClick={save}
+              disabled={saving}
+            >
+              <Save className="w-4 h-4" />
+              {saving ? "Salvando..." : "Salvar Alterações"}
+            </Button>
+          }
+        >
+          <div className="p-5">
+            {/* COMPANY */}
+            {active === "company" && (
+              <CompanySection
+                draft={draft}
+                setDraft={setDraft}
+                tab={companyTab}
+                setTab={setCompanyTab}
+                isAdminOrManager={isAdminOrManager}
+                onEditStore={(id) => setStoreEditId(id)} // ✅ botão Editar abre modal
+              />
+            )}
+
+            {/* USER */}
+            {active === "user" && (
+              <UserSection draft={draft} setDraft={setDraft} isAdminOrManager={isAdminOrManager} />
+            )}
+
+            {/* NOTIFICATIONS */}
+            {active === "notifications" && (
+              <NotificationsSection draft={draft} setDraft={setDraft} isAdminOrManager={isAdminOrManager} />
+            )}
+
+            {/* SECURITY */}
+            {active === "security" && (
+              <SecuritySection draft={draft} setDraft={setDraft} isAdminOrManager={isAdminOrManager} />
+            )}
+
+            {/* APPEARANCE */}
+            {active === "appearance" && <AppearanceSection draft={draft} setDraft={setDraft} />}
+          </div>
+        </Card>
+      </div>
+    </div>
+
+    {/* ✅ MODAL: Editar Loja */}
+    {storeEditId && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* overlay */}
+        <button
+          type="button"
+          className="absolute inset-0 bg-black/40"
+          onClick={closeStoreModal}
+          aria-label="Fechar modal"
+        />
+
+        {/* painel */}
+        <div className="relative w-full max-w-xl bg-white border border-gray-200 rounded-2xl shadow-xl">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <div>
+              <div className="text-sm font-extrabold text-gray-900">Editar Loja</div>
+              <div className="text-xs text-gray-500">Ajuste nome, endereço e status.</div>
+            </div>
+            <Button variant="outlined" size="sm" onClick={closeStoreModal}>
+              Fechar
+            </Button>
           </div>
 
-          <div className="flex items-center gap-3 w-full max-w-[640px] justify-end">
-            <div className="w-full max-w-[360px]">
-              <Input
-                value={search}
-                onChange={setSearch}
-                placeholder="Buscar em Configurações..."
-                icon={<Search size={18} />}
+          <div className="p-5 grid gap-4">
+            <Input
+              label="Nome"
+              value={storeForm.name}
+              onChange={(v) => setStoreForm((p) => ({ ...p, name: v }))}
+              placeholder="Nome da loja"
+            />
+            <Input
+              label="Endereço"
+              value={storeForm.address}
+              onChange={(v) => setStoreForm((p) => ({ ...p, address: v }))}
+              placeholder="Endereço completo"
+            />
+
+            <div className="flex items-start justify-between gap-4 p-4 rounded-lg border border-gray-200 bg-white">
+              <div>
+                <div className="text-sm font-extrabold text-gray-900">Loja ativa</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Se desativar, a loja fica como inativa no sistema.
+                </div>
+              </div>
+
+              {/* ✅ Toggle mais aparente + vai esquerda/direita certinho */}
+              <Switch
+                checked={storeForm.active}
+                onChange={(v) => setStoreForm((p) => ({ ...p, active: v }))}
               />
             </div>
-
-            <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm">
-              <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 font-black">
-                {draft.user.name.slice(0, 1).toUpperCase()}
-              </div>
-              <div className="leading-tight">
-                <div className="text-sm font-extrabold text-gray-900">{draft.user.name}</div>
-                <div className="text-xs text-gray-500">{draft.user.role}</div>
-              </div>
-            </div>
           </div>
-        </div>
 
-        {/* LAYOUT: sidebar interna + card conteúdo */}
-        <div className="grid grid-cols-[260px_1fr] gap-4 max-[980px]:grid-cols-1">
-          {/* SIDEBAR (coluna esquerda do F-pattern) */}
-          <Card title="Menu" icon={<Laptop className="w-4 h-4" />}>
-            <div className="p-3">
-              {filteredMenu.length === 0 ? (
-                <div className="text-sm text-gray-500 p-2">Nenhum item encontrado.</div>
-              ) : (
-                <div className="flex flex-col gap-1">
-                  {filteredMenu.map((item) => (
-                    <MenuItem
-                      key={item.key}
-                      active={active === item.key}
-                      label={item.label}
-                      icon={item.icon}
-                      onClick={() => setActive(item.key)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </Card>
-
-          {/* CONTEÚDO (área principal) */}
-          <Card
-            title={sectionTitle(active)}
-            actions={
-              <Button
-                variant="primary"
-                className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white"
-                onClick={save}
-                disabled={saving}
-              >
-                <Save className="w-4 h-4" />
-                {saving ? "Salvando..." : "Salvar Alterações"}
-              </Button>
-            }
-          >
-            <div className="p-5">
-              {/* COMPANY */}
-              {active === "company" && (
-                <CompanySection
-                  draft={draft}
-                  setDraft={setDraft}
-                  tab={companyTab}
-                  setTab={setCompanyTab}
-                  isAdminOrManager={isAdminOrManager}
-                  onEditStore={(id) => setStoreEditId(id)} // ✅ botão Editar abre modal
-                />
-              )}
-
-              {/* USER */}
-              {active === "user" && (
-                <UserSection draft={draft} setDraft={setDraft} isAdminOrManager={isAdminOrManager} />
-              )}
-
-              {/* NOTIFICATIONS */}
-              {active === "notifications" && (
-                <NotificationsSection draft={draft} setDraft={setDraft} isAdminOrManager={isAdminOrManager} />
-              )}
-
-              {/* SECURITY */}
-              {active === "security" && (
-                <SecuritySection draft={draft} setDraft={setDraft} isAdminOrManager={isAdminOrManager} />
-              )}
-
-              {/* APPEARANCE */}
-              {active === "appearance" && <AppearanceSection draft={draft} setDraft={setDraft} />}
-            </div>
-          </Card>
+          <div className="px-5 py-4 border-t border-gray-100 flex justify-end gap-2">
+            <Button variant="outlined" onClick={closeStoreModal}>
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white"
+              onClick={saveStoreModal}
+            >
+              Salvar
+            </Button>
+          </div>
         </div>
       </div>
-
-      {/* ✅ MODAL: Editar Loja */}
-      {storeEditId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* overlay */}
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/40"
-            onClick={closeStoreModal}
-            aria-label="Fechar modal"
-          />
-
-          {/* painel */}
-          <div className="relative w-full max-w-xl bg-white border border-gray-200 rounded-2xl shadow-xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-              <div>
-                <div className="text-sm font-extrabold text-gray-900">Editar Loja</div>
-                <div className="text-xs text-gray-500">Ajuste nome, endereço e status.</div>
-              </div>
-              <Button variant="outlined" size="sm" onClick={closeStoreModal}>
-                Fechar
-              </Button>
-            </div>
-
-            <div className="p-5 grid gap-4">
-              <Input
-                label="Nome"
-                value={storeForm.name}
-                onChange={(v) => setStoreForm((p) => ({ ...p, name: v }))}
-                placeholder="Nome da loja"
-              />
-              <Input
-                label="Endereço"
-                value={storeForm.address}
-                onChange={(v) => setStoreForm((p) => ({ ...p, address: v }))}
-                placeholder="Endereço completo"
-              />
-
-              <div className="flex items-start justify-between gap-4 p-4 rounded-lg border border-gray-200 bg-white">
-                <div>
-                  <div className="text-sm font-extrabold text-gray-900">Loja ativa</div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    Se desativar, a loja fica como inativa no sistema.
-                  </div>
-                </div>
-
-                {/* ✅ Toggle mais aparente + vai esquerda/direita certinho */}
-                <Switch
-                  checked={storeForm.active}
-                  onChange={(v) => setStoreForm((p) => ({ ...p, active: v }))}
-                />
-              </div>
-            </div>
-
-            <div className="px-5 py-4 border-t border-gray-100 flex justify-end gap-2">
-              <Button variant="outlined" onClick={closeStoreModal}>
-                Cancelar
-              </Button>
-              <Button
-                variant="primary"
-                className="bg-emerald-500 hover:bg-emerald-600 text-white"
-                onClick={saveStoreModal}
-              >
-                Salvar
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* ✅ FIM MODAL */}
-    </div>
-  );
+    )}
+    {/* ✅ FIM MODAL */}
+  </div>
+);
 }
 
 /* ---------------- UI helpers ---------------- */
