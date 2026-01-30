@@ -12,7 +12,6 @@ datasource db {
 
 // ---------------------------------------------------------
 //  MODELS — POS SYSTEM (Multi-Store / Multi-Tenant)
-//  🔒 ISOLAMENTO TOTAL POR EMPRESA
 // ---------------------------------------------------------
 
 model User {
@@ -134,8 +133,8 @@ model Product {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
-  costPrice   Float?
-  salePrice   Float
+  costPrice   Int?
+  salePrice   Int
   barcode     String?
   active      Boolean  @default(true)
   quantity    Int      @default(0)
@@ -145,10 +144,8 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  categoryId     String?   @db.ObjectId
-  category       Category? @relation(fields: [categoryId], references: [id])
-  categoryName   String?
-  categoryActive Boolean   @default(true)
+  categoryId String?   @db.ObjectId
+  category   Category? @relation(fields: [categoryId], references: [id])
 
   companyId String  @db.ObjectId
   company   Company @relation(fields: [companyId], references: [id])
@@ -158,21 +155,21 @@ model Product {
 
   saleItems SaleItem[]
 
+  @@unique([companyId, barcode])
   @@index([companyId])
   @@index([companyId, active])
   @@index([companyId, storeId])
   @@index([companyId, categoryId])
-  @@index([companyId, barcode])
   @@index([storeId])
 }
 
 model Cashier {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  openingAmount Float
-  closingAmount Float?
+  openingAmount Int
+  closingAmount Int?
   openedAt      DateTime  @default(now())
   closedAt      DateTime?
-  status        String    // 'open' | 'closed'
+  status        String // 'open' | 'closed'
 
   companyId String  @db.ObjectId
   company   Company @relation(fields: [companyId], references: [id])
@@ -193,10 +190,10 @@ model Cashier {
 model Sale {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   date          DateTime @default(now())
-  total         Float
-  discount      Float    @default(0)
+  total         Int
+  discount      Int     @default(0)
   paymentMethod String
-  status        String   @default("completed")
+  status        String  @default("completed")
 
   companyId String  @db.ObjectId
   company   Company @relation(fields: [companyId], references: [id])
@@ -224,8 +221,8 @@ model Sale {
 model SaleItem {
   id        String @id @default(auto()) @map("_id") @db.ObjectId
   quantity  Int
-  unitPrice Float
-  subtotal  Float
+  unitPrice Int
+  subtotal  Int
 
   saleId String @db.ObjectId
   sale   Sale   @relation(fields: [saleId], references: [id])
@@ -260,9 +257,9 @@ model Customer {
 
 model Financial {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  type        String   // 'income' | 'expense'
+  type        String // 'income' | 'expense'
   category    String
-  amount      Float
+  amount      Int
   date        DateTime @default(now())
   description String?
 
