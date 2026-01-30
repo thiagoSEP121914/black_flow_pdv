@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useId } from "react";
 
 interface ILineChartData {
   label: string;
@@ -59,6 +59,45 @@ export function LineChart({
   valuePrefix = "",
   valueSuffix = "",
 }: ILineChartProps) {
+  // 1. Hook: useId first
+  const gradientId = useId();
+
+  // 2. Hook: useMemo for points and labels
+  const { points, yAxisLabels } = useMemo(() => {
+    if (!data || data.length === 0) {
+      return { points: [], yAxisLabels: [] };
+    }
+
+    const maxValue = Math.max(...data.map((d) => d.value));
+    const minValue = Math.min(...data.map((d) => d.value));
+    const range = maxValue - minValue || 1;
+
+    // Removed unused paddedMax
+
+    const yAxisLabels = Array.from({ length: 5 }, (_, i) => {
+      const value = minValue + (range / 4) * i;
+      return Math.round(value);
+    }).reverse();
+
+    const points = data.map((item, index) => {
+      const x = (index / (data.length - 1 || 1)) * 100;
+      const percentage = ((item.value - minValue) / range) * 100;
+      const y = 100 - percentage;
+      return { x, y, value: item.value, label: item.label };
+    });
+
+    return { points, yAxisLabels };
+  }, [data]);
+
+  // 3. Hook: useMemo for path
+  const pathD = useMemo(() => {
+    return points.reduce((acc, point, i, a) => {
+      if (i === 0) return `M ${point.x},${point.y}`;
+      return `${acc} ${createBezierCommand(point, i, a)}`;
+    }, "");
+  }, [points]);
+
+  // 4. Return early if no data
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500">
@@ -67,49 +106,7 @@ export function LineChart({
     );
   }
 
-  const { points, yAxisLabels } = useMemo(() => {
-    const maxValue = Math.max(...data.map((d) => d.value));
-    const minValue = Math.min(...data.map((d) => d.value));
-    const range = maxValue - minValue || 1;
-
-    // Add some padding to the top range so the line doesn't hit the very top
-    const paddedMax = maxValue + range * 0.1;
-
-    const yAxisLabels = Array.from({ length: 5 }, (_, i) => {
-      // Use paddedMax for calculating labels if you want them well distributed,
-      // or just standard distribution based on data.
-      // Let's stick to a simple distribution covering the range.
-      const value = minValue + (range / 4) * i;
-      return Math.round(value);
-    }).reverse();
-
-    const points = data.map((item, index) => {
-      const x = (index / (data.length - 1 || 1)) * 100;
-      // To ensure it fits nicely, use paddedMax for Y calculation if desired,
-      // but let's stick to the visible range logic.
-      const percentage = ((item.value - minValue) / range) * 100;
-
-      // We want some padding top/bottom in the chart area usually,
-      // but strict math: y=100 is bottom (min), y=0 is top (max).
-      // Let's constrain it slightly to avoid clipping strokeWidth.
-      const y = 100 - percentage;
-      return { x, y, value: item.value, label: item.label };
-    });
-
-    return { points, yAxisLabels };
-  }, [data]);
-
-  const pathD = useMemo(() => {
-    return points.reduce((acc, point, i, a) => {
-      if (i === 0) return `M ${point.x},${point.y}`;
-      return `${acc} ${createBezierCommand(point, i, a)}`;
-    }, "");
-  }, [points]);
-
   const fillPathD = `${pathD} L 100 100 L 0 100 Z`;
-
-  // Gradient ID
-  const gradientId = `gradient-${Math.random().toString(36).substr(2, 9)}`;
 
   return (
     <div className="w-full">
@@ -178,11 +175,6 @@ export function LineChart({
               strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
             />
-
-            {/* Optional: Points on hover provided via CSS or just subtle dots if requested. 
-                Prototype usually has no dots or very subtle ones. 
-                Leaving dots out for 'clean' look or making them tiny.
-            */}
           </svg>
 
           {/* X-Axis Labels */}

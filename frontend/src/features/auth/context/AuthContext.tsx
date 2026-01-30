@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import type { User } from "../types/LoginResponse";
 import { AuthContext } from "./AuthContextData";
 import { AuthRepository } from "../repository/AuthRepository";
@@ -20,6 +20,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const authRepository = useMemo(() => new AuthRepository(), []);
 
+  const logout = useCallback(async () => {
+    try {
+      await authRepository.logout();
+    } finally {
+      localStorage.removeItem("user");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      setUser(null);
+    }
+  }, [authRepository]);
+
   useEffect(() => {
     // 3. Validação de segurança em background
     const validateToken = async () => {
@@ -37,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     validateToken();
-  }, []);
+  }, [user, logout, authRepository]);
 
   async function login(data: LoginInput) {
     const response = await authRepository.login(data.email, data.password);
@@ -48,17 +59,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     localStorage.setItem("user", JSON.stringify(user));
     setUser(user);
-  }
-
-  async function logout() {
-    try {
-      await authRepository.logout();
-    } finally {
-      localStorage.removeItem("user");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      setUser(null);
-    }
   }
 
   return (
