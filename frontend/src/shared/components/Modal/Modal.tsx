@@ -83,7 +83,7 @@ export const Modal = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 transition-opacity duration-300 animate-in fade-in"
       onClick={handleOverlayClick}
       ref={overlayRef}
       role="dialog"
