@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { userController } from "../features/user/index.js";
+import { userController } from "../features/User/index.js";
 
 class AuthRouter {
     private router: Router;
