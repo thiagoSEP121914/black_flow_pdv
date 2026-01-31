@@ -7,9 +7,12 @@ import pinoHttpModule from "pino-http";
 import { env } from "./core/env.js";
 import { errorHandler } from "./middlewares/ErrorHandler.js";
 import helmet from "helmet";
+import { setupSwagger } from "./docs/swagger/index.js";
+
 
 config();
 const server = express();
+setupSwagger(server);
 server.use(helmet());
 
 const pinoHttp = pinoHttpModule.default;
