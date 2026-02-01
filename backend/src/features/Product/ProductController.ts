@@ -1,180 +1,313 @@
-// src/features/product/ProductController.ts
-/*
 import { Router, Request, Response } from "express";
 import { Controller } from "../../core/Controller.js";
-import { productService, CreateProductDTO, UpdateProductDTO } from "./ProductService.js";
-import { AccessTokenPayload } from "../../utils/jwt.js";
-import { prisma } from "../../core/prisma.js";
+import { ProductService, CreateProductDTO, UpdateProductDTO } from "./ProductService.js";
+import { SearchInput } from "../../core/interface/IRepository.js";
+import { z } from "zod";
 
-// Interface do request autenticado (provavelmente do seu middleware)
-export interface AuthenticateRequest extends Request {
-    user: AccessTokenPayload; // Espera-se que tenha { companyId: string, ... }
-}
+const createProductSchema: z.ZodType<CreateProductDTO> = z.object({
+    name: z.string().min(2),
+    description: z.string().optional(),
+    costPrice: z.number().optional(),
+    salePrice: z.number(),
+    barcode: z.string().optional(),
+    categoryId: z.string().optional(),
+    storeId: z.string(),
+    quantity: z.number().optional(),
+    minStock: z.number().optional(),
+    active: z.boolean().optional(),
+});
+
+const updateProductSchema: z.ZodType<UpdateProductDTO> = z.object({
+    name: z.string().min(2).optional(),
+    description: z.string().optional(),
+    costPrice: z.number().optional(),
+    salePrice: z.number().optional(),
+    barcode: z.string().optional(),
+    categoryId: z.string().optional(),
+    quantity: z.number().optional(),
+    minStock: z.number().optional(),
+});
 
 export class ProductController extends Controller {
-    // Helper para checar se a loja pertence à empresa do usuário logado
-    private async checkStoreAccess(companyId: string, storeId: string): Promise<boolean> {
-        const store = await prisma.store.findFirst({
-            where: { id: storeId, companyId: companyId },
-        });
+    private productService: ProductService;
 
-        return !!store;
+    constructor(productService: ProductService) {
+        super();
+        this.productService = productService;
     }
 
+    /**
+     * @swagger
+     * tags:
+     *   name: Products
+     *   description: Gerenciamento de Produtos
+     */
+
+    /**
+     * @swagger
+     * components:
+     *   schemas:
+     *     Product:
+     *       type: object
+     *       required:
+     *         - name
+     *         - salePrice
+     *         - storeId
+     *       properties:
+     *         id:
+     *           type: string
+     *           description: ID do produto
+     *         name:
+     *           type: string
+     *           description: Nome do produto
+     *         description:
+     *           type: string
+     *           description: Descrição do produto
+     *         costPrice:
+     *           type: number
+     *           description: Preço de custo
+     *         salePrice:
+     *           type: number
+     *           description: Preço de venda
+     *         barcode:
+     *           type: string
+     *           description: Código de barras
+     *         quantity:
+     *           type: integer
+     *           description: Quantidade em estoque
+     *         minStock:
+     *           type: integer
+     *           description: Estoque mínimo
+     *         active:
+     *           type: boolean
+     *           description: Status do produto
+     *         storeId:
+     *           type: string
+     *           description: ID da loja
+     *         createdAt:
+     *           type: string
+     *           format: date-time
+     *         updatedAt:
+     *           type: string
+     *           format: date-time
+     *     CreateProductDto:
+     *       type: object
+     *       required:
+     *         - name
+     *         - salePrice
+     *         - storeId
+     *       properties:
+     *         name:
+     *           type: string
+     *           example: "Coca Cola"
+     *         description:
+     *           type: string
+     *           example: "Refrigerante 2L"
+     *         salePrice:
+     *           type: number
+     *           example: 10.50
+     *         costPrice:
+     *           type: number
+     *           example: 5.00
+     *         storeId:
+     *           type: string
+     *           example: "64e..."
+     *         barcode:
+     *           type: string
+     *           example: "789..."
+     */
+
     handle(): Router {
-        this.route.post("/", async (req: Request, res: Response) => {
-            try {
-                const { companyId } = (req as AuthenticateRequest).user;
-                const data = req.body as CreateProductDTO;
-
-                if (!data.storeId) {
-                    return res.status(400).json({ error: "storeId is required" });
-                }
-
-                const hasAccess = await this.checkStoreAccess(companyId, data.storeId);
-
-                if (!hasAccess) {
-                    return res.status(403).json({ error: "Access denied to this store" });
-                }
-
-                // ✅ PASSA O companyId
-                const product = await productService.createProduct(companyId, data);
-
-                return res.status(201).json(product);
-            } catch (err) {
-                const error = err as Error;
-                console.error(error);
-
-                return res.status(500).json({ error: error.message });
-            }
-        });
-
+        /**
+         * @swagger
+         * /auth/products:
+         *   get:
+         *     summary: Lista produtos com paginação e filtros
+         *     tags: [Products]
+         *     security:
+         *       - bearerAuth: []
+         *     parameters:
+         *       - in: query
+         *         name: page
+         *         schema:
+         *           type: integer
+         *           default: 1
+         *         description: Número da página
+         *       - in: query
+         *         name: per_page
+         *         schema:
+         *           type: integer
+         *           default: 10
+         *         description: Itens por página
+         *       - in: query
+         *         name: filter
+         *         schema:
+         *           type: string
+         *         description: Texto para busca (nome, descrição, código de barras)
+         *       - in: query
+         *         name: sort_by
+         *         schema:
+         *           type: string
+         *         description: Campo para ordenação
+         *       - in: query
+         *         name: sort_dir
+         *         schema:
+         *           type: string
+         *           enum: [asc, desc]
+         *         description: Direção da ordenação
+         *     responses:
+         *       200:
+         *         description: Lista de produtos
+         *         content:
+         *           application/json:
+         *             schema:
+         *               type: object
+         *               properties:
+         *                 data:
+         *                   type: array
+         *                   items:
+         *                     $ref: '#/components/schemas/Product'
+         *                 total:
+         *                   type: integer
+         */
         this.route.get("/", async (req: Request, res: Response) => {
-            try {
-                const { companyId } = (req as AuthenticateRequest).user;
-                const { storeId } = req.params;
+            const params: SearchInput = {
+                page: req.query.page ? Number(req.query.page) : undefined,
+                per_page: req.query.per_page ? Number(req.query.per_page) : undefined,
+                sort_by: req.query.sort_by as string,
+                sort_dir: req.query.sort_dir as "asc" | "desc",
+                filter: req.query.filter as string,
+                companyId: req.user!.companyId
+            };
 
-                if (!storeId) {
-                    return res.status(400).json({ error: "storeId query parameter is required" });
-                }
+            const result = await this.productService.findAll(params);
 
-                // Checagem de segurança
-                const hasAccess = await this.checkStoreAccess(companyId, storeId);
-
-                if (!hasAccess) {
-                    return res.status(403).json({ error: "Access denied to this store" });
-                }
-
-                const products = await productService.listProductsByStore(storeId);
-
-                return res.json(products);
-            } catch (err) {
-                const error = err as Error;
-                console.error(error);
-
-                return res.status(500).json({ error: error.message });
-            }
+            return res.status(200).json(result);
         });
 
-       
+        /**
+         * @swagger
+         * /auth/products/{id}:
+         *   get:
+         *     summary: Busca um produto pelo ID
+         *     tags: [Products]
+         *     security:
+         *       - bearerAuth: []
+         *     parameters:
+         *       - in: path
+         *         name: id
+         *         required: true
+         *         schema:
+         *           type: string
+         *         description: ID do produto
+         *     responses:
+         *       200:
+         *         description: Produto encontrado
+         *         content:
+         *           application/json:
+         *             schema:
+         *               $ref: '#/components/schemas/Product'
+         */
         this.route.get("/:id", async (req: Request, res: Response) => {
-            try {
-                const { companyId } = (req as AuthenticateRequest).user;
-                const storeId = req.query.storeId as string;
-                const { id } = req.params;
+            const userContext = req.user!;
+            const id = req.params.id;
+            const response = await this.productService.findById(userContext, id);
 
-                if (!storeId) {
-                    return res.status(400).json({ error: "storeId query parameter is required" });
-                }
-
-                // Checagem de segurança
-                const hasAccess = await this.checkStoreAccess(companyId, storeId);
-
-                if (!hasAccess) {
-                    return res.status(403).json({ error: "Access denied to this store" });
-                }
-
-                const product = await productService.getProductById(id, storeId);
-
-                if (!product) {
-                    return res.status(404).json({ error: "Product not found" });
-                }
-
-                return res.json(product);
-            } catch (err) {
-                const error = err as Error;
-                console.error(error);
-
-                return res.status(500).json({ error: error.message });
-            }
-        });
-        this.route.put("/:id", async (req: Request, res: Response) => {
-            try {
-                const { companyId } = (req as AuthenticateRequest).user;
-                const { storeId } = req.params;
-                const { id } = req.params;
-
-                // 🛑 CORREÇÃO APLICADA AQUI:
-                // Destrutura para garantir que storeId não seja passado no objeto data,
-                // prevenindo que o Prisma tente atualizar o campo de escopo (storeId)
-                const { storeId: _storeId, ...data } = req.body as UpdateProductDTO & {
-                    storeId?: string;
-                };
-
-                if (!storeId) {
-                    return res.status(400).json({ error: "storeId query parameter is required" });
-                }
-
-                // Checagem de segurança (mantida)
-                const hasAccess = await this.checkStoreAccess(companyId, storeId);
-
-                if (!hasAccess) {
-                    return res.status(403).json({ error: "Access denied to this store" });
-                }
-
-                // Passamos o storeId da QUERY como parâmetro de escopo
-                const product = await productService.updateProduct(id, storeId, data);
-
-                return res.json(product);
-            } catch (err) {
-                const error = err as Error;
-                console.error(error);
-
-                // Retorna 404 se o 'update' não encontrou o produto naquela loja
-                return res.status(error.message.includes("not found") ? 404 : 400).json({ error: error.message });
-            }
+            return res.status(200).json(response);
         });
 
+        /**
+         * @swagger
+         * /auth/products:
+         *   post:
+         *     summary: Cria um novo produto
+         *     tags: [Products]
+         *     security:
+         *       - bearerAuth: []
+         *     requestBody:
+         *       required: true
+         *       content:
+         *         application/json:
+         *           schema:
+         *             $ref: '#/components/schemas/CreateProductDto'
+         *     responses:
+         *       201:
+         *         description: Produto criado com sucesso
+         *         content:
+         *           application/json:
+         *             schema:
+         *               $ref: '#/components/schemas/Product'
+         */
+        this.route.post("/", async (req: Request, res: Response) => {
+            const userContext = req.user!;
+            const input = createProductSchema.parse(req.body);
+            const product = await this.productService.save(userContext, input);
+            res.status(201).json(product);
+        });
+
+        /**
+         * @swagger
+         * /auth/products/{id}:
+         *   patch:
+         *     summary: Atualiza dados de um produto
+         *     tags: [Products]
+         *     security:
+         *       - bearerAuth: []
+         *     parameters:
+         *       - in: path
+         *         name: id
+         *         required: true
+         *         schema:
+         *           type: string
+         *         description: ID do produto
+         *     requestBody:
+         *       required: true
+         *       content:
+         *         application/json:
+         *           schema:
+         *             $ref: '#/components/schemas/CreateProductDto'
+         *     responses:
+         *       200:
+         *         description: Produto atualizado
+         *         content:
+         *           application/json:
+         *             schema:
+         *               $ref: '#/components/schemas/Product'
+         */
+        this.route.patch("/:id", async (req: Request, res: Response) => {
+            const userContext = req.user!;
+            const id = req.params.id;
+            const input = updateProductSchema.parse(req.body);
+            const product = await this.productService.update(userContext, id, input);
+            res.status(200).json(product);
+        });
+
+        /**
+         * @swagger
+         * /auth/products/{id}:
+         *   delete:
+         *     summary: Remove um produto
+         *     tags: [Products]
+         *     security:
+         *       - bearerAuth: []
+         *     parameters:
+         *       - in: path
+         *         name: id
+         *         required: true
+         *         schema:
+         *           type: string
+         *         description: ID do produto
+         *     responses:
+         *       204:
+         *         description: Produto removido com sucesso
+         */
         this.route.delete("/:id", async (req: Request, res: Response) => {
-            try {
-                const { companyId } = (req as AuthenticateRequest).user;
-                const { storeId } = req.params;
-                const { id } = req.params;
-
-                if (!storeId) {
-                    return res.status(400).json({ error: "storeId query parameter is required" });
-                }
-
-                const hasAccess = await this.checkStoreAccess(companyId, storeId);
-
-                if (!hasAccess) {
-                    return res.status(403).json({ error: "Access denied to this store" });
-                }
-
-                await productService.deactivateProduct(id, storeId);
-
-                return res.status(204).send(); // 204 No Content
-            } catch (err) {
-                const error = err as Error;
-                console.error(error);
-
-                return res.status(error.message.includes("not found") ? 404 : 400).json({ error: error.message });
-            }
+            const userContext = req.user!;
+            const id = req.params.id;
+            await this.productService.delete(userContext, id);
+            res.status(204).send();
         });
 
         return this.route;
     }
 }
-const productController = new ProductController();
-export default productController.handle();
-*/

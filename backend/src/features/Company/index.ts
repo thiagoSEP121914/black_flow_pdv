@@ -1,5 +1,5 @@
 import { prisma } from "../../core/prisma.js";
-import { CompanyRepositoryImpl } from "../Company/repositories/CompanyRepositorieImpl.js";
+import { CompanyRepositoryImpl } from "./repositories/CompanyRepositoryImpl.js";
 import { CompanyService } from "./CompanyService.js";
 import { CompanyController } from "./CompanyController.js";
 

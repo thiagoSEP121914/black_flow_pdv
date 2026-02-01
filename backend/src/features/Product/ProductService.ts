@@ -1,6 +1,9 @@
+import { SearchInput, SearchOutPut } from "../../core/interface/IRepository.js";
+import { IProductRepository } from "./repositories/IProductRepository.js";
+import { Product } from "@prisma/client";
+import { NotFoundError } from "../../errors/NotFounError.js";
+import { UserContext } from "../../core/types/UserContext.js";
 import { prisma } from "../../core/prisma.js";
-
-// === DTOs ===
 
 export interface CreateProductDTO {
     name: string;
@@ -8,7 +11,7 @@ export interface CreateProductDTO {
     costPrice?: number;
     salePrice: number;
     barcode?: string;
-    categoryId?: string; // ID da categoria enviado pelo usuário
+    categoryId?: string;
     storeId: string;
     quantity?: number;
     minStock?: number;
@@ -24,154 +27,90 @@ export interface UpdateProductDTO {
     categoryId?: string;
     quantity?: number;
     minStock?: number;
-    // Não incluímos categoryName/Active no update DTO, pois isso
-    // é atualizado pelo serviço se o categoryId mudar.
 }
-
-// === SERVICE ===
 
 export class ProductService {
-    // --- Funções de Leitura (Otimizadas para MongoDB) ---
+    private productRepository: IProductRepository;
 
-    /**
-     * Lista produtos ativos de uma loja específica.
-     * Retorna os dados da categoria incorporados, evitando JOIN.
-     */
-    async listProductsByStore(storeId: string) {
-        return prisma.product.findMany({
-            where: {
-                storeId,
-                active: true,
-            },
-            // ✅ REMOVIDO include: { category: true } - Usamos os campos incorporados
-        });
+    constructor(productRepository: IProductRepository) {
+        this.productRepository = productRepository;
     }
 
-    /**
-     * Busca um produto específico, garantindo a posse pela loja.
-     */
-    async getProductById(id: string, storeId: string) {
-        return prisma.product.findFirst({
-            where: { id, storeId },
-            // ✅ REMOVIDO include: { category: true }
-        });
+    async findAll(params: SearchInput): Promise<SearchOutPut<Product>> {
+        return this.productRepository.findAll(params);
     }
 
-    // --- Funções de Escrita (Lógica de Incorporação) ---
+    async findById(ctx: UserContext, id: string): Promise<Product> {
+        const product = await this.productRepository.findById(id);
 
-    /**
-     * Cria um novo produto, incorporando dados da categoria (se existir).
-     */
-    async createProduct(companyId: string, data: CreateProductDTO) {
-        const { categoryId, ...productData } = data;
+        if (!product) throw new NotFoundError("Product not found");
 
-        let categoryFields: {
-            categoryName?: string;
-            categoryActive?: boolean;
-            categoryId?: string;
-        } = {};
-
-        if (categoryId) {
-            const category = await prisma.category.findUnique({
-                where: { id: categoryId },
-                select: {
-                    id: true,
-                    name: true,
-                    active: true,
-                },
-            });
-
-            if (!category) {
-                throw new Error("Category not found");
-            }
-
-            categoryFields = {
-                categoryId: category.id,
-                categoryName: category.name,
-                categoryActive: category.active,
-            };
+        if (product.companyId !== ctx.companyId) {
+            throw new NotFoundError("Product not found");
         }
 
-        return prisma.product.create({
-            data: {
-                name: productData.name,
-                description: productData.description,
-                costPrice: productData.costPrice,
-                salePrice: productData.salePrice,
-                barcode: productData.barcode,
-                storeId: productData.storeId,
-
-                companyId, // ✅ OBRIGATÓRIO
-
-                quantity: productData.quantity ?? 0,
-                minStock: productData.minStock,
-                active: productData.active ?? true,
-
-                ...categoryFields,
-            },
-        });
+        return product;
     }
 
-    /**
-     * Atualiza um produto. Atualiza o embedding se o categoryId mudar.
-     */
-    async updateProduct(id: string, storeId: string, data: Partial<UpdateProductDTO>) {
-        // Validação usando early return
-        const existingProduct = await this.getProductById(id, storeId);
+    async save(ctx: UserContext, data: CreateProductDTO): Promise<Product> {
+        const storeId = data.storeId;
 
-        if (!existingProduct) {
-            throw new Error("Product not found in this store.");
+        if (!storeId) {
+            throw new Error("Store ID is required");
         }
 
-        let categoryFields = {};
-        const { categoryId, ...updateData } = data;
-
-        // Se o categoryId foi fornecido na atualização, busca e incorpora os novos dados
-        if (categoryId !== undefined) {
-            const category = await prisma.category.findUnique({
-                where: { id: categoryId },
-                select: { name: true, active: true },
-            });
-
-            if (!category && categoryId !== null) {
-                throw new Error(`Category ID ${categoryId} not found.`);
-            }
-
-            // 2. Define os novos campos incorporados (ou null, se a categoria for removida)
-            categoryFields = {
-                categoryName: category ? category.name : null,
-                categoryActive: category ? category.active : null,
-                categoryId: category ? categoryId : null,
-            };
-        }
-
-        return prisma.product.update({
-            where: { id },
-            data: {
-                ...updateData,
-                ...categoryFields,
-            },
+        const store = await prisma.store.findUnique({
+            where: { id: storeId },
         });
+
+        if (!store) throw new NotFoundError("Store not found");
+
+        if (store.companyId !== ctx.companyId) {
+            throw new NotFoundError("Store not found");
+        }
+
+        const safeData = {
+            ...data,
+            companyId: ctx.companyId,
+            storeId,
+        };
+
+        return this.productRepository.insert(safeData);
     }
 
-    /**
-     * Desativa um produto, garantindo que ele pertence à loja.
-     */
-    async deactivateProduct(id: string, storeId: string) {
-        // Validação usando early return
-        const product = await prisma.product.findFirst({
-            where: { id, storeId },
-        });
+    async update(ctx: UserContext, id: string, data: UpdateProductDTO): Promise<Product> {
+        const product = await this.productRepository.findById(id);
 
-        if (!product) {
-            throw new Error("Product not found in this store.");
+        if (!product) throw new NotFoundError("Product not found");
+
+        if (product.companyId !== ctx.companyId) {
+            throw new NotFoundError("Product not found");
         }
 
-        return prisma.product.update({
-            where: { id },
-            data: { active: false },
-        });
+        return this.productRepository.update({ ...product, ...data });
+    }
+
+    async delete(ctx: UserContext, id: string): Promise<void> {
+        const product = await this.productRepository.findById(id);
+
+        if (!product) throw new NotFoundError("Product not found");
+
+        if (product.companyId !== ctx.companyId) {
+            throw new NotFoundError("Product not found");
+        }
+
+        await this.productRepository.delete(id);
+    }
+
+    async findByCode(ctx: UserContext, code: string): Promise<Product> {
+        const product = await this.productRepository.findByCode(code);
+
+        if (!product) throw new NotFoundError("Product not found");
+
+        if (product.companyId !== ctx.companyId) {
+            throw new NotFoundError("Product not found");
+        }
+
+        return product;
     }
 }
-
-export const productService = new ProductService();

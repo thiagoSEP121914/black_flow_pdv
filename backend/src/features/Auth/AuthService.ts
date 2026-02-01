@@ -8,14 +8,14 @@ import { comparePasword } from "../../utils/bcrypt.js";
 import { prisma } from "../../core/prisma.js";
 import { PrismaClient } from "@prisma/client/extension";
 
-type SignupDTO = {
+export type SignupDTO = {
     email: string;
     password: string;
     name: string;
     companyName: string;
 };
 
-type LoginDTO = {
+export type LoginDTO = {
     email: string;
     password: string;
 };
@@ -41,7 +41,10 @@ export class AuthService {
     }
 
     async signupOwner(data: SignupDTO) {
-        const company = await this.companyService.save({
+        // Contexto de sistema para criação inicial (bootstrapping)
+        const systemContext = { userId: "system", companyId: "system", role: "owner" };
+
+        const company = await this.companyService.save(systemContext, {
             name: data.companyName,
             status: "active",
         });
