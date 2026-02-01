@@ -11,12 +11,16 @@ export class ProductRepositoryImpl implements IProductRepository {
     }
 
     async findAll(params: SearchInput): Promise<SearchOutPut<Product>> {
-        const { page, per_page, sort_by, sort_dir, filter } = params;
+        const { page, per_page, sort_by, sort_dir, filter, companyId } = params;
 
         const skip = page && per_page ? (page - 1) * per_page : undefined;
         const take = per_page ?? undefined;
 
-        const where = this.buildWhereClause(filter);
+        const where: any = this.buildWhereClause(filter);
+
+        if (companyId) {
+            where.companyId = companyId;
+        }
 
         const [items, total] = await Promise.all([
             this.prisma.product.findMany({

@@ -209,8 +209,9 @@ export class ProductController extends Controller {
          *               $ref: '#/components/schemas/Product'
          */
         this.route.get("/:id", async (req: Request, res: Response) => {
+            const userContext = req.user!;
             const id = req.params.id;
-            const response = await this.productService.findById(id);
+            const response = await this.productService.findById(userContext, id);
 
             return res.status(200).json(response);
         });
@@ -238,8 +239,9 @@ export class ProductController extends Controller {
          *               $ref: '#/components/schemas/Product'
          */
         this.route.post("/", async (req: Request, res: Response) => {
+            const userContext = req.user!;
             const input = createProductSchema.parse(req.body);
-            const product = await this.productService.save(input);
+            const product = await this.productService.save(userContext, input);
             res.status(201).json(product);
         });
 
@@ -273,9 +275,10 @@ export class ProductController extends Controller {
          *               $ref: '#/components/schemas/Product'
          */
         this.route.patch("/:id", async (req: Request, res: Response) => {
+            const userContext = req.user!;
             const id = req.params.id;
             const input = updateProductSchema.parse(req.body);
-            const product = await this.productService.update(id, input);
+            const product = await this.productService.update(userContext, id, input);
             res.status(200).json(product);
         });
 
@@ -299,8 +302,9 @@ export class ProductController extends Controller {
          *         description: Produto removido com sucesso
          */
         this.route.delete("/:id", async (req: Request, res: Response) => {
+            const userContext = req.user!;
             const id = req.params.id;
-            await this.productService.delete(id);
+            await this.productService.delete(userContext, id);
             res.status(204).send();
         });
 

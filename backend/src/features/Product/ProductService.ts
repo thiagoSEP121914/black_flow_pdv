@@ -2,6 +2,7 @@ import { SearchInput, SearchOutPut } from "../../core/interface/IRepository.js";
 import { IProductRepository } from "./repositories/IProductRepositorie.js";
 import { Product } from "@prisma/client";
 import { NotFoundError } from "../../errors/NotFounError.js";
+import { UserContext } from "../../core/types/UserContext.js";
 
 export interface CreateProductDTO {
     name: string;
@@ -36,34 +37,60 @@ export class ProductService {
     }
 
     async findAll(params: SearchInput): Promise<SearchOutPut<Product>> {
+        // Enforce companyId is already handled by the controller passing it in params.
+        // The repository should respect it.
         return this.productRepository.findAll(params);
     }
 
-    async findById(id: string): Promise<Product> {
+    async findById(ctx: UserContext, id: string): Promise<Product> {
         const product = await this.productRepository.findById(id);
         if (!product) throw new NotFoundError("Product not found");
+
+        if (product.companyId !== ctx.companyId) {
+            throw new NotFoundError("Product not found");
+        }
+
         return product;
     }
 
-    async save(data: CreateProductDTO): Promise<Product> {
-        return this.productRepository.insert(data);
+    async save(ctx: UserContext, data: CreateProductDTO): Promise<Product> {
+        const safeData = {
+            ...data,
+            companyId: ctx.companyId
+        };
+        return this.productRepository.insert(safeData);
     }
 
-    async update(id: string, data: UpdateProductDTO): Promise<Product> {
+    async update(ctx: UserContext, id: string, data: UpdateProductDTO): Promise<Product> {
         const product = await this.productRepository.findById(id);
         if (!product) throw new NotFoundError("Product not found");
+
+        if (product.companyId !== ctx.companyId) {
+            throw new NotFoundError("Product not found");
+        }
+
         return this.productRepository.update({ ...product, ...data });
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(ctx: UserContext, id: string): Promise<void> {
         const product = await this.productRepository.findById(id);
         if (!product) throw new NotFoundError("Product not found");
+
+        if (product.companyId !== ctx.companyId) {
+            throw new NotFoundError("Product not found");
+        }
+
         await this.productRepository.delete(id);
     }
 
-    async findByCode(code: string): Promise<Product> {
+    async findByCode(ctx: UserContext, code: string): Promise<Product> {
         const product = await this.productRepository.findByCode(code);
         if (!product) throw new NotFoundError("Product not found");
+
+        if (product.companyId !== ctx.companyId) {
+            throw new NotFoundError("Product not found");
+        }
+
         return product;
     }
 }
