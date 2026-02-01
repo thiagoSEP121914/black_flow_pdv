@@ -5,3 +5,6 @@ steps:
 
 images:
   - 'gcr.io/$PROJECT_ID/black-flow-backend'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
