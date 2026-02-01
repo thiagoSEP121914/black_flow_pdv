@@ -8,6 +8,20 @@ export const swaggerSpec = swaggerJSDoc({
             version: "1.0.0",
             description: "API de Ponto de Venda",
         },
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                },
+            },
+        },
+        security: [
+            {
+                bearerAuth: [],
+            },
+        ],
     },
     apis: ["./src/features/**/*.ts"],
 });
