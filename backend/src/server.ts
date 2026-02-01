@@ -34,4 +34,5 @@ server.use(errorHandler);
 
 server.listen(PORT, () => {
     logger.info(`Server is running on the PORT: ${PORT}`);
+    logger.info(`Swagger is running on the URL: http://localhost:${PORT}/api`);
 });
