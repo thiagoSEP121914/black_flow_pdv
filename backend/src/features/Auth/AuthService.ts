@@ -19,7 +19,7 @@ export type LoginDTO = {
     password: string;
 };
 
-type LoginResponseDTO = {
+export type LoginResponseDTO = {
     accessToken: string;
     refreshToken: string;
     expireIn: string;
@@ -57,7 +57,7 @@ export class AuthService {
         return { company, user };
     }
 
-    async loginUser(data: LoginDTO, userAgent?: string, ipAddress?: string) {
+    async loginUser(data: LoginDTO, userAgent?: string, ipAddress?: string): Promise<LoginResponseDTO> {
         const user = await this.userService.findByEmail(data.email);
 
         if (!user) {
