@@ -4,6 +4,7 @@ export type SearchInput = {
     sort_by?: string;
     sort_dir?: "asc" | "desc";
     filter?: string | null;
+    companyId: string;
 };
 
 export type SearchOutPut<Model> = {

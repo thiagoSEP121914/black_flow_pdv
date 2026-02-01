@@ -41,7 +41,10 @@ export class AuthService {
     }
 
     async signupOwner(data: SignupDTO) {
-        const company = await this.companyService.save({
+        // Contexto de sistema para criação inicial (bootstrapping)
+        const systemContext = { userId: "system", companyId: "system", role: "owner" };
+
+        const company = await this.companyService.save(systemContext, {
             name: data.companyName,
             status: "active",
         });

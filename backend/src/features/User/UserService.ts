@@ -33,7 +33,7 @@ export class UserService {
     }
 
     async findAll(params: {
-        companyId?: string;
+        companyId: string;
         storeId?: string;
         page?: number;
         per_page?: number;
