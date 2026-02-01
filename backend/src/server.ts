@@ -20,7 +20,7 @@ server.use(helmet());
 
 const pinoHttp = pinoHttpModule.default;
 server.use(pinoHttp({ logger }));
-const PORT = env.PORT;
+const PORT = env.APP_PORT;
 
 server.use(cors());
 server.use(express.json());
