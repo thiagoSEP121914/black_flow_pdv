@@ -1,18 +1,20 @@
 import { Request, Response } from "express";
 import { AuthService } from "./AuthService.js";
 import { Controller } from "../../core/Controller.js";
+import { SignupDTO, LoginDTO } from "./AuthService.js";
+import { z } from "zod";
 
-interface SignupDTO {
-    email: string;
-    password: string;
-    name: string;
-    companyName: string;
-}
+const signupSchema: z.ZodType<SignupDTO> = z.object({
+    email: z.string().email(),
+    password: z.string().min(6),
+    name: z.string().min(2),
+    companyName: z.string().min(2),
+});
 
-interface LoginDTO {
-    email: string;
-    password: string;
-}
+const loginSchema: z.ZodType<LoginDTO> = z.object({
+    email: z.string(),
+    password: z.string().min(6),
+});
 
 export class AuthController extends Controller {
     private authService: AuthService;
@@ -113,7 +115,7 @@ export class AuthController extends Controller {
          *         description: Conta criada com sucesso
          */
         this.route.post("/signup", async (req: Request, res: Response) => {
-            const data = req.body as SignupDTO;
+            const data = signupSchema.parse(req.body);
             const result = await this.authService.signupOwner(data);
 
             return res.status(201).json({
@@ -149,7 +151,7 @@ export class AuthController extends Controller {
          *               $ref: '#/components/schemas/AuthResponse'
          */
         this.route.post("/login", async (req: Request, res: Response) => {
-            const data = req.body as LoginDTO;
+            const data = loginSchema.parse(req.body);
             const result = await this.authService.loginUser(data, req);
 
             return res.json(result);
