@@ -1,7 +1,7 @@
 import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
 import { Request } from "express";
 import { UserService } from "../User/UserService.js";
-import { CompanyService } from "../company/CompanyService.js";
+import { CompanyService } from "../Company/CompanyService.js";
 import { UnauthorizedError } from "../../errors/UnauthorizedError.js";
 import { NotFoundError } from "../../errors/NotFounError.js";
 import { comparePasword } from "../../utils/bcrypt.js";

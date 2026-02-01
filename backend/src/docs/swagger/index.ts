@@ -1,6 +1,6 @@
-import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./swagger.js";
+export async function setupSwagger(app: any) {
+    const swaggerUi = (await import("swagger-ui-express")).default;
+    const { swaggerSpec } = await import("./swagger.js");
 
-export function setupSwagger(app: any) {
     app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 }

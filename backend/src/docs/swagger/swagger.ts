@@ -1,6 +1,5 @@
 import swaggerJSDoc from "swagger-jsdoc";
 
-
 export const swaggerSpec = swaggerJSDoc({
     definition: {
         openapi: "3.0.0",
@@ -11,4 +10,4 @@ export const swaggerSpec = swaggerJSDoc({
         },
     },
     apis: ["./src/features/**/*.ts"],
-}); 
+});
