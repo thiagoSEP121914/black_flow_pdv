@@ -1,31 +1,39 @@
-import { IProductRepository } from "./IProductRepositorie.js";
-import { Product } from "@prisma/client";
 import { SearchInput, SearchOutPut } from "../../../core/interface/IRepository.js";
-import { PrismaClient } from "@prisma/client";
+import { IStoreRepository } from "./IStoreRepository.js";
+import { PrismaClient, Store } from "@prisma/client";
 
-export class ProductRepositoryImpl implements IProductRepository {
+export class StoreRepositoryImpl implements IStoreRepository {
     private prisma: PrismaClient;
 
     constructor(prisma: PrismaClient) {
         this.prisma = prisma;
     }
+    async findAllStoreByCompany(id: string): Promise<Store[]> {
+        return await this.prisma.store.findMany({
+            where: { companyId: id },
+        });
+    }
 
-    async findAll(params: SearchInput): Promise<SearchOutPut<Product>> {
-        const { page, per_page, sort_by, sort_dir, filter } = params;
+    async findAll(params: SearchInput): Promise<SearchOutPut<Store>> {
+        const { page, per_page, sort_by, sort_dir, filter, companyId } = params;
 
         const skip = page && per_page ? (page - 1) * per_page : undefined;
         const take = per_page ?? undefined;
 
-        const where = this.buildWhereClause(filter);
+        const where: any = this.buildWhereClause(filter);
+
+        if (companyId) {
+            where.companyId = companyId;
+        }
 
         const [items, total] = await Promise.all([
-            this.prisma.product.findMany({
+            this.prisma.store.findMany({
                 where,
                 ...(skip !== undefined ? { skip } : {}),
                 ...(take !== undefined ? { take } : {}),
                 orderBy: sort_by ? { [sort_by]: sort_dir ?? "asc" } : undefined,
             }),
-            this.prisma.product.count({ where }),
+            this.prisma.store.count({ where }),
         ]);
 
         return {
@@ -38,44 +46,33 @@ export class ProductRepositoryImpl implements IProductRepository {
             filter: filter ?? null,
         };
     }
-    async findById(id: string): Promise<Product> {
-        return (await this.prisma.product.findUnique({
+
+
+    async findById(id: string): Promise<Store> {
+        return (await this.prisma.store.findUnique({
             where: { id },
-        })) as Product;
+        })) as Store;
     }
-    async insert(product: Partial<Product>): Promise<Product> {
-        return await this.prisma.product.create({
-            data: product as any,
+
+    async insert(model: Partial<Store>): Promise<Store> {
+        return await this.prisma.store.create({
+            data: model as any,
         });
     }
-    async update(model: Partial<Product>): Promise<Product> {
+
+    async update(model: Partial<Store>): Promise<Store> {
         const { id, ...data } = model;
+        if (!id) throw new Error("ID required for update");
 
-        if (!id) throw new Error("ID not provided for update");
-
-        return await this.prisma.product.update({
+        return await this.prisma.store.update({
             where: { id },
             data: data as any,
         });
     }
+
     async delete(id: string): Promise<void> {
-        await this.prisma.product.delete({
+        await this.prisma.store.delete({
             where: { id },
-        });
-    }
-    async findByCode(code: string): Promise<Product> {
-        return (await this.prisma.product.findFirst({
-            where: { barcode: code },
-        })) as Product;
-    }
-    async findByCompanyId(companyId: string): Promise<Product[]> {
-        return await this.prisma.product.findMany({
-            where: { companyId },
-        });
-    }
-    async findByCategoryId(categoryId: string): Promise<Product[]> {
-        return await this.prisma.product.findMany({
-            where: { categoryId },
         });
     }
 
@@ -99,4 +96,4 @@ export class ProductRepositoryImpl implements IProductRepository {
             ],
         };
     }
-}
+}   

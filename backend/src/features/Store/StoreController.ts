@@ -1,104 +1,78 @@
-/*
 import { Router, Request, Response } from "express";
 import { Controller } from "../../core/Controller.js";
-import { storeService, CreateStoreDTO, UpdateStoreDTO } from "./StoreService.js";
-import { AccessTokenPayload } from "../../utils/jwt.js";
+import { StoreService, CreateStoreDTO, UpdateStoreDTO } from "./StoreService.js";
+import { SearchInput } from "../../core/interface/IRepository.js";
+import { z } from "zod";
 
-export interface AuthenticateRequest extends Request {
-    user: AccessTokenPayload;
-}
+const createStoreSchema: z.ZodType<CreateStoreDTO> = z.object({
+    name: z.string().min(2),
+    cnpj: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.string().email().optional(),
+    address: z.string().optional(),
+});
+
+const updateStoreSchema: z.ZodType<UpdateStoreDTO> = z.object({
+    name: z.string().min(2).optional(),
+    cnpj: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.string().email().optional(),
+    address: z.string().optional(),
+    status: z.string().optional(),
+});
 
 export class StoreController extends Controller {
+    private storeService: StoreService;
+
+    constructor(storeService: StoreService) {
+        super();
+        this.storeService = storeService;
+    }
+
     handle(): Router {
-        this.route.post("/", async (req: Request, res: Response) => {
-            try {
-                // ✅ Correção: Use 'Request' na assinatura e faça o cast aqui
-                const companyId = (req as AuthenticateRequest).user.companyId;
-                const data = req.body as CreateStoreDTO;
-                const store = await storeService.createStore(companyId, data);
-
-                return res.status(201).json(store);
-            } catch (err) {
-                const error = err as Error;
-                console.error(error);
-
-                return res.status(error.message.includes("not found") ? 404 : 500).json({ error: error.message });
-            }
-        });
-
         this.route.get("/", async (req: Request, res: Response) => {
-            try {
-                // ✅ Correção: Use 'Request' na assinatura e faça o cast aqui
-                const companyId = (req as AuthenticateRequest).user.companyId;
-                const page = parseInt(req.query.page as string) || 1;
-                const perPage = parseInt(req.query.perPage as string) || 10;
-                const result = await storeService.getStores(companyId, page, perPage);
+            const params: SearchInput = {
+                page: req.query.page ? Number(req.query.page) : undefined,
+                per_page: req.query.per_page ? Number(req.query.per_page) : undefined,
+                sort_by: req.query.sort_by as string,
+                sort_dir: req.query.sort_dir as "asc" | "desc",
+                filter: req.query.filter as string,
+                companyId: req.user!.companyId
+            };
 
-                return res.json(result);
-            } catch (err) {
-                const error = err as Error;
-                console.error(error);
-
-                return res.status(500).json({ error: error.message });
-            }
+            const result = await this.storeService.getStores(params);
+            return res.status(200).json(result);
         });
 
         this.route.get("/:id", async (req: Request, res: Response) => {
-            try {
-                const companyId = (req as AuthenticateRequest).user.companyId;
-                const storeId = req.params.id as string;
-                const store = await storeService.getStoreById(companyId, storeId);
-
-                if (!store) return res.status(404).json({ error: "Store not found" });
-
-                return res.json(store);
-            } catch (err) {
-                const error = err as Error;
-                console.error(error);
-
-                return res.status(error.message.includes("not found") ? 404 : 500).json({ error: error.message });
-            }
+            const userContext = req.user!;
+            const id = req.params.id;
+            const response = await this.storeService.getStoreById(userContext, id);
+            return res.status(200).json(response);
         });
 
-        this.route.put("/:id", async (req: Request, res: Response) => {
-            try {
-                const companyId = (req as AuthenticateRequest).user.companyId;
-                const storeId = req.params.id as string;
-                const data = req.body as UpdateStoreDTO;
-                const store = await storeService.updateStore(companyId, storeId, data);
+        this.route.post("/", async (req: Request, res: Response) => {
+            const userContext = req.user!;
+            const input = createStoreSchema.parse(req.body);
+            const store = await this.storeService.createStore(userContext, input);
+            res.status(201).json(store);
+        });
 
-                if (!store) return res.status(404).json({ error: "Store not found for update" });
-
-                return res.json(store);
-            } catch (err) {
-                const error = err as Error;
-                console.error(error);
-
-                return res.status(error.message.includes("not found") ? 404 : 400).json({ error: error.message });
-            }
+        this.route.patch("/:id", async (req: Request, res: Response) => {
+            const userContext = req.user!;
+            const id = req.params.id;
+            const input = updateStoreSchema.parse(req.body);
+            const store = await this.storeService.updateStore(userContext, id, input);
+            res.status(200).json(store);
         });
 
         this.route.delete("/:id", async (req: Request, res: Response) => {
-            try {
-                // ✅ Correção: Use 'Request' na assinatura e faça o cast aqui
-                const companyId = (req as AuthenticateRequest).user.companyId;
-                const storeId = req.params.id as string;
-                const result = await storeService.deleteStore(companyId, storeId);
-
-                if (!result) return res.status(404).json({ error: "Store not found for deletion" });
-
-                return res.status(204).send();
-            } catch (err) {
-                const error = err as Error;
-                console.error(error);
-
-                return res.status(error.message.includes("not found") ? 404 : 400).json({ error: error.message });
-            }
+            const userContext = req.user!;
+            const id = req.params.id;
+            await this.storeService.deleteStore(userContext, id);
+            res.status(204).send();
         });
 
         return this.route;
     }
 }
-
-export const storeController = new StoreController().handle();
-*/

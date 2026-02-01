@@ -2,6 +2,7 @@ import { Company } from "@prisma/client";
 import { ICompanyRepository } from "./repositories/ICompanyRepository.js";
 import { SearchOutPut, SearchInput } from "../../core/interface/IRepository.js";
 import { NotFoundError } from "../../errors/NotFounError.js";
+import { UserContext } from "../../core/types/UserContext.js";
 
 export interface CreateCompanyDto {
     name: string;
@@ -21,30 +22,6 @@ export interface UpdateCompanyDto {
     status?: string;
 }
 
-export interface ResponseCompanyDto {
-    id: string;
-    name: string;
-    cnpj: string | null;
-    phone: string | null;
-    email: string | null;
-    address: string | null;
-    status: string;
-    createdAt: Date;
-    updatedAt: Date;
-}
-export interface ResponseCompanyDto {
-    id: string;
-    name: string;
-    cnpj: string | null;
-    phone: string | null;
-    email: string | null;
-    address: string | null;
-    status: string;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-
 export class CompanyService {
     private repository: ICompanyRepository;
 
@@ -52,14 +29,23 @@ export class CompanyService {
         this.repository = repository;
     }
 
-    async findAll(params: SearchInput): Promise<SearchOutPut<Company>> {
-        return this.repository.findAll(params);
+    async findAll(ctx: UserContext, params: SearchInput): Promise<SearchOutPut<Company>> {
+        const safeParams = {
+            ...params,
+            companyId: ctx.companyId,
+        };
+
+        return this.repository.findAll(safeParams);
     }
 
-    async findById(id: string): Promise<Company> {
+    async findById(ctx: UserContext, id: string): Promise<Company> {
         const company = await this.repository.findById(id);
 
         if (!company) throw new NotFoundError("Empresa não encontrada");
+
+        if (company.id !== ctx.companyId) {
+            throw new NotFoundError("Empresa não encontrada");
+        }
 
         return company;
     }
@@ -72,22 +58,30 @@ export class CompanyService {
         return company;
     }
 
-    async save(data: CreateCompanyDto): Promise<Company> {
+    async save(ctx: UserContext, data: CreateCompanyDto): Promise<Company> {
         return this.repository.insert(data);
     }
 
-    async update(id: string, data: UpdateCompanyDto): Promise<Company> {
+    async update(ctx: UserContext, id: string, data: UpdateCompanyDto): Promise<Company> {
         const company = await this.repository.findById(id);
 
         if (!company) throw new NotFoundError("Empresa não encontrada");
+
+        if (company.id !== ctx.companyId) {
+            throw new NotFoundError("Empresa não encontrada");
+        }
 
         return this.repository.update({ ...company, ...data });
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(ctx: UserContext, id: string): Promise<void> {
         const company = await this.repository.findById(id);
 
         if (!company) throw new NotFoundError("Empresa não encontrada");
+
+        if (company.id !== ctx.companyId) {
+            throw new NotFoundError("Empresa não encontrada");
+        }
 
         await this.repository.delete(id);
     }

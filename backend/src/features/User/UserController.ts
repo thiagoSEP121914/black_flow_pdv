@@ -62,7 +62,7 @@ export class UserController extends Controller {
          *               $ref: '#/components/schemas/User'
          */
         this.route.get("/me", async (req: Request, res: Response) => {
-            const userId = req.user?.id;
+            const userId = req.user?.userId;
             const userCompanyId = req.user?.companyId;
 
             if (!userId || !userCompanyId) {

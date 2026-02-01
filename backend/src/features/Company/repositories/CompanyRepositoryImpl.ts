@@ -11,12 +11,16 @@ export class CompanyRepositoryImpl implements ICompanyRepository {
     }
 
     async findAll(params: SearchInput): Promise<SearchOutPut<Company>> {
-        const { page, per_page, sort_by, sort_dir, filter } = params;
+        const { page, per_page, sort_by, sort_dir, filter, companyId } = params;
 
         const skip = page && per_page ? (page - 1) * per_page : undefined;
         const take = per_page ?? undefined;
 
         const where = this.buildWhereClause(filter);
+
+        if (companyId) {
+            where.id = companyId;
+        }
 
         const [items, total] = await Promise.all([
             this.prisma.company.findMany({

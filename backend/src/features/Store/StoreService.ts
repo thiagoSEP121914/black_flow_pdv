@@ -1,4 +1,8 @@
-import { prisma } from "../../core/prisma.js";
+import { IStoreRepository } from "./Repositorie/IStoreRepository.js";
+import { SearchInput, SearchOutPut } from "../../core/interface/IRepository.js";
+import { Store } from "@prisma/client";
+import { NotFoundError } from "../../errors/NotFounError.js";
+import { UserContext } from "../../core/types/UserContext.js";
 
 export interface CreateStoreDTO {
     name: string;
@@ -18,75 +22,52 @@ export interface UpdateStoreDTO {
 }
 
 export class StoreService {
-    // Criar loja vinculada a uma empresa
-    async createStore(companyId: string, data: CreateStoreDTO) {
-        const store = await prisma.store.create({
-            data: {
-                ...data,
-                companyId,
-                status: "active",
-            },
-        });
+    private storeRepository: IStoreRepository;
 
+    constructor(storeRepository: IStoreRepository) {
+        this.storeRepository = storeRepository;
+    }
+
+    async createStore(ctx: UserContext, data: CreateStoreDTO): Promise<Store> {
+        return this.storeRepository.insert({
+            ...data,
+            companyId: ctx.companyId,
+            status: "active"
+        });
+    }
+
+    async getStores(params: SearchInput): Promise<SearchOutPut<Store>> {
+        return this.storeRepository.findAll(params);
+    }
+
+    async getStoreById(ctx: UserContext, id: string): Promise<Store> {
+        const store = await this.storeRepository.findById(id);
+        if (!store) throw new NotFoundError("Store not found");
+
+        if (store.companyId !== ctx.companyId) {
+            throw new NotFoundError("Store not found");
+        }
         return store;
     }
 
-    // Listar lojas da empresa com paginação
-    async getStores(companyId: string, page = 1, perPage = 10) {
-        const skip = (page - 1) * perPage;
-        const [stores, total] = await Promise.all([
-            prisma.store.findMany({
-                where: { companyId },
-                skip,
-                take: perPage,
-                orderBy: { createdAt: "desc" },
-            }),
-            prisma.store.count({ where: { companyId } }),
-        ]);
+    async updateStore(ctx: UserContext, id: string, data: UpdateStoreDTO): Promise<Store> {
+        const store = await this.storeRepository.findById(id);
+        if (!store) throw new NotFoundError("Store not found");
 
-        return {
-            data: stores,
-            pagination: {
-                total,
-                page,
-                perPage,
-                totalPages: Math.ceil(total / perPage),
-            },
-        };
+        if (store.companyId !== ctx.companyId) {
+            throw new NotFoundError("Store not found");
+        }
+
+        return this.storeRepository.update({ ...store, ...data });
     }
 
-    // Obter loja pelo ID (garantindo que pertence à empresa)
-    async getStoreById(companyId: string, storeId: string) {
-        const store = await prisma.store.findFirst({
-            where: { id: storeId, companyId },
-        });
+    async deleteStore(ctx: UserContext, id: string): Promise<void> {
+        const store = await this.storeRepository.findById(id);
+        if (!store) throw new NotFoundError("Store not found");
 
-        return store;
-    }
-
-    // Atualizar loja
-    async updateStore(companyId: string, storeId: string, data: UpdateStoreDTO) {
-        const store = await prisma.store.updateMany({
-            where: { id: storeId, companyId },
-            data,
-        });
-
-        if (store.count === 0) throw new Error("Store not found or not authorized");
-
-        return await this.getStoreById(companyId, storeId);
-    }
-
-    // Desativar loja (soft delete)
-    async deleteStore(companyId: string, storeId: string) {
-        const store = await prisma.store.updateMany({
-            where: { id: storeId, companyId },
-            data: { status: "inactive" },
-        });
-
-        if (store.count === 0) throw new Error("Store not found or not authorized");
-
-        return { message: "Store deactivated" };
+        if (store.companyId !== ctx.companyId) {
+            throw new NotFoundError("Store not found");
+        }
+        await this.storeRepository.update({ ...store, status: "inactive" });
     }
 }
-
-export const storeService = new StoreService();
