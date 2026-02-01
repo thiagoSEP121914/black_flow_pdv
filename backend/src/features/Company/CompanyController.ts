@@ -1,9 +1,28 @@
 import { Router } from "express";
 import { Controller } from "../../core/Controller.js";
-import { CompanyService } from "./CompanyService.js";
+import { CompanyService, CreateCompanyDto, UpdateCompanyDto } from "./CompanyService.js";
 import { Request, Response } from "express";
 import { SearchInput } from "../../core/interface/IRepository.js";
-import { CreateCompanyDto, UpdateCompanyDto } from "./dtos/index.js";
+import { z } from "zod";
+
+
+const createCompanySchema: z.ZodType<CreateCompanyDto> = z.object({
+    name: z.string().min(2),
+    cnpj: z.string().min(14).optional(),
+    phone: z.string().min(11).optional(),
+    email: z.string().email().optional(),
+    address: z.string().optional(),
+    status: z.string().optional(),
+});
+
+const updateCompanySchema: z.ZodType<UpdateCompanyDto> = z.object({
+    name: z.string().min(2).optional(),
+    cnpj: z.string().min(14).optional(),
+    phone: z.string().min(11).optional(),
+    email: z.string().email().optional(),
+    address: z.string().optional(),
+    status: z.string().optional(),
+});
 
 export class CompanyController extends Controller {
     private companyService: CompanyService;
@@ -190,13 +209,7 @@ export class CompanyController extends Controller {
          *               $ref: '#/components/schemas/Company'
          */
         this.route.post("/", async (req: Request, res: Response) => {
-            const input: CreateCompanyDto = {
-                name: req.body.name,
-                email: req.body.email,
-                cnpj: req.body.cnpj,
-                phone: req.body.phone,
-                address: req.body.address,
-            };
+            const input = createCompanySchema.parse(req.body);
             const company = await this.companyService.save(input);
             res.status(201).json(company);
         });
@@ -233,7 +246,7 @@ export class CompanyController extends Controller {
 
         this.route.patch("/:id", async (req: Request, res: Response) => {
             const id = req.params.id;
-            const input: UpdateCompanyDto = req.body;
+            const input = updateCompanySchema.parse(req.body);
             const company = await this.companyService.update(id, input);
             res.status(200).json(company);
         });
