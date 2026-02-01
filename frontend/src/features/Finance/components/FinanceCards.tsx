@@ -42,7 +42,7 @@ export const FinanceCards = () => {
                 </div>
             </Card>
 
-            <Card className="!bg-emerald-500 !text-white !border-emerald-500 p-6">
+            <Card className="bg-emerald-500! text-white! border-emerald-500! p-6">
                 <div className="flex justify-between items-start">
                     <div>
                         <p className="text-emerald-100 font-medium">Saldo</p>
