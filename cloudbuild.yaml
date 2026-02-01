@@ -1,10 +1,25 @@
+images:
+  - 'gcr.io/$PROJECT_ID/black-flow-backend'
+
 steps:
+  # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/black-flow-backend', '.']
     dir: 'backend'
-
-images:
-  - 'gcr.io/$PROJECT_ID/black-flow-backend'
+  
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'nextflow'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/black-flow-backend'
+      - '--region'
+      - 'southamerica-east1'
+      - '--platform'
+      - 'managed'
 
 options:
   logging: CLOUD_LOGGING_ONLY
