@@ -1,4 +1,4 @@
-import { IProductRepository } from "./IProductRepositorie.js";
+import { IProductRepository } from "./IProductRepository.js";
 import { Product } from "@prisma/client";
 import { SearchInput, SearchOutPut } from "../../../core/interface/IRepository.js";
 import { PrismaClient } from "@prisma/client";

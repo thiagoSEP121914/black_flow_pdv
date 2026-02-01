@@ -1,5 +1,5 @@
 import { prisma } from "../../core/prisma.js";
-import { ProductRepositoryImpl } from "./repositories/ProductRepositorie.js";
+import { ProductRepositoryImpl } from "./repositories/ProductRepository.js";
 import { ProductService } from "./ProductService.js";
 import { ProductController } from "./ProductController.js";
 
