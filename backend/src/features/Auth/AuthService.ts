@@ -8,14 +8,14 @@ import { comparePasword } from "../../utils/bcrypt.js";
 import { prisma } from "../../core/prisma.js";
 import { PrismaClient } from "@prisma/client/extension";
 
-type SignupDTO = {
+export type SignupDTO = {
     email: string;
     password: string;
     name: string;
     companyName: string;
 };
 
-type LoginDTO = {
+export type LoginDTO = {
     email: string;
     password: string;
 };
