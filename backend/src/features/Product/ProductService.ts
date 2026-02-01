@@ -3,6 +3,7 @@ import { IProductRepository } from "./repositories/IProductRepositorie.js";
 import { Product } from "@prisma/client";
 import { NotFoundError } from "../../errors/NotFounError.js";
 import { UserContext } from "../../core/types/UserContext.js";
+import { prisma } from "../../core/prisma.js";
 
 export interface CreateProductDTO {
     name: string;
@@ -54,9 +55,30 @@ export class ProductService {
     }
 
     async save(ctx: UserContext, data: CreateProductDTO): Promise<Product> {
+        const storeId = data.storeId;
+
+        if (!storeId) {
+            // If user doesn't send storeId and has no storeId in context (e.g. Owner), they must provide it.
+            throw new Error("Store ID is required");
+        }
+
+        // SECURITY CHECK: Verify if Store belongs to the Company
+        const store = await prisma.store.findUnique({
+            where: { id: storeId }
+        });
+
+        if (!store) throw new NotFoundError("Store not found");
+
+        if (store.companyId !== ctx.companyId) {
+            // Cross-Tenant Access detected!
+            // throwing NotFound to hide existence of unauthorized resources
+            throw new NotFoundError("Store not found");
+        }
+
         const safeData = {
             ...data,
-            companyId: ctx.companyId
+            companyId: ctx.companyId,
+            storeId // Use the resolved storeId
         };
         return this.productRepository.insert(safeData);
     }
