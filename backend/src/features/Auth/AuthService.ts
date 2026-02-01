@@ -1,12 +1,11 @@
 import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
-import { Request } from "express";
+
 import { UserService } from "../User/UserService.js";
 import { CompanyService } from "../Company/CompanyService.js";
 import { UnauthorizedError } from "../../errors/UnauthorizedError.js";
 import { NotFoundError } from "../../errors/NotFounError.js";
 import { comparePasword } from "../../utils/bcrypt.js";
-import { prisma } from "../../core/prisma.js";
-import { PrismaClient } from "@prisma/client/extension";
+import { SessionService } from "../Session/SessionService.js";
 
 export type SignupDTO = {
     email: string;
@@ -20,28 +19,29 @@ export type LoginDTO = {
     password: string;
 };
 
-/*
 type LoginResponseDTO = {
     accessToken: string;
     refreshToken: string;
     expireIn: string;
     createdAt: string;
 };
-*/
 
 export class AuthService {
     private userService: UserService;
     private companyService: CompanyService;
-    prisma: PrismaClient;
+    private sessionService: SessionService;
 
-    constructor(userService: UserService, companyService: CompanyService) {
+    constructor(
+        userService: UserService,
+        companyService: CompanyService,
+        sessionService: SessionService
+    ) {
         this.userService = userService;
         this.companyService = companyService;
-        this.prisma = prisma;
+        this.sessionService = sessionService;
     }
 
     async signupOwner(data: SignupDTO) {
-        // Contexto de sistema para criação inicial (bootstrapping)
         const systemContext = { userId: "system", companyId: "system", role: "owner" };
 
         const company = await this.companyService.save(systemContext, {
@@ -61,7 +61,7 @@ export class AuthService {
         return { company, user };
     }
 
-    async loginUser(data: LoginDTO, req: Request) {
+    async loginUser(data: LoginDTO, userAgent?: string, ipAddress?: string) {
         const user = await this.userService.findByEmail(data.email);
 
         if (!user) {
@@ -74,7 +74,7 @@ export class AuthService {
 
         const isValid = await comparePasword(data.password, user.password);
 
-        if (!isValid) throw new UnauthorizedError("Invalid credentials"); // 401
+        if (!isValid) throw new UnauthorizedError("Invalid credentials");
 
         const accessToken = generateAccessToken({
             id: user.id,
@@ -83,27 +83,21 @@ export class AuthService {
             companyId: user.companyId,
         });
         const refreshToken = generateRefreshToken({ id: user.id });
-        await this.createSession(user.id, refreshToken, req);
+        await this.createSession(user.id, refreshToken, userAgent, ipAddress);
 
         const createdAt = new Date().toISOString();
 
         return { accessToken, refreshToken, expireIn: "1h", createdAt };
     }
+
     async logout(refreshToken: string) {
-        await prisma.session.deleteMany({
-            where: {
-                token: refreshToken,
-            },
-        });
+        await this.sessionService.deleteByToken(refreshToken);
 
         return { message: "User logged out successfully" };
     }
 
     async refreshToken(refreshToken: string) {
-        const session = await prisma.session.findUnique({
-            where: { token: refreshToken },
-            include: { user: true },
-        });
+        const session = await this.sessionService.findByToken(refreshToken);
 
         if (!session) {
             throw new UnauthorizedError("Invalid refresh token");
@@ -113,10 +107,13 @@ export class AuthService {
             throw new UnauthorizedError("Refresh token expired");
         }
 
+        // Precisamos do usuario completo.
+        const user = await this.userService.findById(session.userId);
+
         const accessToken = generateAccessToken({
-            id: session.user.id,
-            email: session.user.email,
-            userType: session.user.userType as "owner" | "operator",
+            id: user.id,
+            email: user.email,
+            userType: user.userType as "owner" | "operator",
             companyId: session.companyId,
         });
 
@@ -126,19 +123,15 @@ export class AuthService {
         };
     }
 
-    private async createSession(userId: string, token: string, req: Request) {
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7);
+    private async createSession(userId: string, token: string, userAgent?: string, ipAddress?: string) {
+        const user = await this.userService.findById(userId);
 
-        await prisma.session.create({
-            data: {
-                token,
-                userId,
-                companyId: (await this.userService.findById(userId)).companyId,
-                expiresAt,
-                userAgent: req.headers["user-agent"],
-                ipAddress: req.ip,
-            },
+        await this.sessionService.create({
+            token,
+            userId,
+            companyId: user.companyId,
+            userAgent: userAgent || null,
+            ipAddress: ipAddress || null,
         });
     }
 }

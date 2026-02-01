@@ -1,4 +1,4 @@
 import { Category } from "@prisma/client";
 import { IRepository } from "../../../core/interface/IRepository.js";
 
-export type ICategoryRepository = IRepository<Category, Partial<Category>>;
+export interface ICategoryRepository extends IRepository<Category, Partial<Category>> { }

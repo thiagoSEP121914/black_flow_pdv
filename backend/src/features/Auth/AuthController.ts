@@ -152,7 +152,10 @@ export class AuthController extends Controller {
          */
         this.route.post("/login", async (req: Request, res: Response) => {
             const data = loginSchema.parse(req.body);
-            const result = await this.authService.loginUser(data, req);
+            const userAgent = req.headers["user-agent"];
+            const ipAddress = req.ip;
+
+            const result = await this.authService.loginUser(data, userAgent, ipAddress);
 
             return res.json(result);
         });
