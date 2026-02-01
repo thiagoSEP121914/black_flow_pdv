@@ -2,7 +2,48 @@ import { Company } from "@prisma/client";
 import { ICompanyRepository } from "./repositories/ICompanyRepository.js";
 import { SearchOutPut, SearchInput } from "../../core/interface/IRepository.js";
 import { NotFoundError } from "../../errors/NotFounError.js";
-import { CreateCompanyDto, UpdateCompanyDto } from "./dtos/index.js";
+
+export interface CreateCompanyDto {
+    name: string;
+    cnpj?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    status?: string;
+}
+
+export interface UpdateCompanyDto {
+    name?: string;
+    cnpj?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    status?: string;
+}
+
+export interface ResponseCompanyDto {
+    id: string;
+    name: string;
+    cnpj: string | null;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+export interface ResponseCompanyDto {
+    id: string;
+    name: string;
+    cnpj: string | null;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 
 export class CompanyService {
     private repository: ICompanyRepository;
