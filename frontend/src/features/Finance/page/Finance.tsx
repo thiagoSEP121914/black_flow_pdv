@@ -5,7 +5,6 @@ import { FinanceCards } from "../components/FinanceCards";
 import { FinanceTable } from "../components/FinanceTable";
 import { Button } from "@/shared/components/ui/Button";
 
-// Mock Data
 const cashFlowData = [
   { label: "Jan", value: 45000 },
   { label: "Fev", value: 52000 },
@@ -26,15 +25,6 @@ export function Finance() {
   return (
     <PageLayout>
       <div className="flex flex-col h-full overflow-y-auto pr-2 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Financeiro</h1>
-            <p className="text-sm text-gray-500">
-              Controle financeiro da empresa
-            </p>
-          </div>
-        </div>
-
         <FinanceCards />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

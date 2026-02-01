@@ -31,11 +31,7 @@ export class AuthService {
     private companyService: CompanyService;
     private sessionService: SessionService;
 
-    constructor(
-        userService: UserService,
-        companyService: CompanyService,
-        sessionService: SessionService
-    ) {
+    constructor(userService: UserService, companyService: CompanyService, sessionService: SessionService) {
         this.userService = userService;
         this.companyService = companyService;
         this.sessionService = sessionService;
