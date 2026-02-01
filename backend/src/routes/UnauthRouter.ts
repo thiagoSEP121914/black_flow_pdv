@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authController } from "../features/auth/index.js";
+import { authController } from "../features/Auth/index.js";
 
 class UnauthRouter {
     public router: Router;

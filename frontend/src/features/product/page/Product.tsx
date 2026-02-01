@@ -3,6 +3,7 @@ import { ActionToolbar } from "@/shared/components/ActionToolBar/ActionTooBar";
 import { ExportToLayout } from "@/shared/components/ExportToLayout/ExportToLayout";
 import { useState } from "react";
 import { PageLayout } from "@/shared/layouts/PageLayout";
+import { ProductModal } from "../components/ProductModal";
 
 interface IProduct {
   id: string;
@@ -17,6 +18,7 @@ interface IProduct {
 
 export function Product() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 5;
 
   const allProducts: IProduct[] = [
@@ -232,7 +234,11 @@ export function Product() {
 
   return (
     <PageLayout>
-      <ActionToolbar showFilter={true} addButtonTitle="Produto" />
+      <ActionToolbar
+        showFilter={true}
+        addButtonTitle="Produto"
+        onAddClick={() => setIsModalOpen(true)}
+      />
       <div className="flex-1 overflow-auto min-h-0">
         <ProductTable
           products={paginatedProducts}
@@ -243,6 +249,12 @@ export function Product() {
         />
       </div>
       <ExportToLayout />
+      {isModalOpen && (
+        <ProductModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </PageLayout>
   );
 }

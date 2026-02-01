@@ -6,11 +6,13 @@ import { FilterButton } from "../FilterButton/FilterButton";
 interface ActionButtonProps {
   showFilter?: boolean;
   addButtonTitle: string;
+  onAddClick?: () => void;
 }
 
 export const ActionToolbar = ({
   showFilter,
   addButtonTitle,
+  onAddClick,
 }: ActionButtonProps) => {
   return (
     <>
@@ -24,6 +26,7 @@ export const ActionToolbar = ({
           <Button
             variant="primary"
             className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer"
+            onClick={onAddClick}
           >
             <Plus className="w-4 h-4" />
             {addButtonTitle}

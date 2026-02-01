@@ -30,6 +30,7 @@
         "pino": "^10.1.0",
         "pino-http": "^11.0.0",
         "reflect-metadata": "^0.2.2",
+        "swagger-ui-express": "^5.0.1",
         "zod": "^4.1.12"
     },
     "devDependencies": {
@@ -40,6 +41,8 @@
         "@types/jsonwebtoken": "^9.0.10",
         "@types/morgan": "^1.9.10",
         "@types/node": "^24.10.1",
+        "@types/swagger-jsdoc": "^6.0.4",
+        "@types/swagger-ui-express": "^4.1.8",
         "@typescript-eslint/eslint-plugin": "^8.46.4",
         "@typescript-eslint/parser": "^8.46.4",
         "eslint": "^9.39.2",

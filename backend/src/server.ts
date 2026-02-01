@@ -10,11 +10,17 @@ import helmet from "helmet";
 
 config();
 const server = express();
+
+if (env.NODE_ENV !== "production") {
+    const { setupSwagger } = await import("./docs/swagger/index.js");
+    await setupSwagger(server);
+}
+
 server.use(helmet());
 
 const pinoHttp = pinoHttpModule.default;
 server.use(pinoHttp({ logger }));
-const PORT = env.PORT;
+const PORT = env.APP_PORT;
 
 server.use(cors());
 server.use(express.json());

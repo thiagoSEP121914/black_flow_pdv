@@ -2,24 +2,7 @@ import { Company } from "@prisma/client";
 import { ICompanyRepository } from "./repositories/ICompanyRepository.js";
 import { SearchOutPut } from "../../core/interface/IRepository.js";
 import { NotFoundError } from "../../errors/NotFounError.js";
-
-export interface CreateCompanyDTO {
-    name: string;
-    cnpj?: string;
-    phone?: string;
-    email?: string;
-    address?: string;
-    status?: string;
-}
-
-export interface UpdateCompanyDTO {
-    name?: string;
-    cnpj?: string;
-    phone?: string;
-    email?: string;
-    address?: string;
-    status?: string;
-}
+import { CreateCompanyDto, UpdateCompanyDto } from "./dtos/index.js";
 
 export class CompanyService {
     private repository: ICompanyRepository;
@@ -48,11 +31,11 @@ export class CompanyService {
         return company;
     }
 
-    async save(data: CreateCompanyDTO): Promise<Company> {
+    async save(data: CreateCompanyDto): Promise<Company> {
         return this.repository.insert(data);
     }
 
-    async update(id: string, data: UpdateCompanyDTO): Promise<Company> {
+    async update(id: string, data: UpdateCompanyDto): Promise<Company> {
         const company = await this.repository.findById(id);
 
         if (!company) throw new NotFoundError("Empresa não encontrada");

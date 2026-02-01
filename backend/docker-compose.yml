@@ -1,0 +1,11 @@
+services:
+    backend:
+        build:
+            context: .
+        image: nextflow-backend:local
+        container_name: nextflow-backend
+        env_file:
+            - ./.env
+        ports:
+            - "3000:8080"
+        restart: unless-stopped
