@@ -16,17 +16,7 @@ export class CompanyRepositoryImpl implements ICompanyRepository {
         const skip = page && per_page ? (page - 1) * per_page : undefined;
         const take = per_page ?? undefined;
 
-        const where: any = {};
-
-        if (filter) {
-            where.OR = [
-                { name: { contains: filter, mode: "insensitive" } },
-                { email: { contains: filter, mode: "insensitive" } },
-                { phone: { contains: filter, mode: "insensitive" } },
-                { cnpj: { contains: filter, mode: "insensitive" } },
-                { address: { contains: filter, mode: "insensitive" } },
-            ];
-        }
+        const where = this.buildWhereClause(filter);
 
         const [items, total] = await Promise.all([
             this.prisma.company.findMany({
@@ -68,11 +58,11 @@ export class CompanyRepositoryImpl implements ICompanyRepository {
     }
 
     async update(model: Partial<Company>): Promise<Company> {
-        if (!model.id) throw new Error("ID is required for update");
+        const { id, ...data } = model;
 
         return await this.prisma.company.update({
-            where: { id: model.id },
-            data: model,
+            where: { id },
+            data,
         });
     }
 
@@ -81,5 +71,28 @@ export class CompanyRepositoryImpl implements ICompanyRepository {
             where: { id },
             data: { status: "inactive" },
         });
+    }
+
+    private buildWhereClause(filter?: string | null): any {
+        if (!filter) return {};
+
+        if (filter.includes("=")) {
+            const [key, value] = filter.split("=");
+            const validKeys = ["name", "email", "phone", "cnpj", "address"];
+
+            if (validKeys.includes(key.trim())) {
+                return { [key.trim()]: { contains: value.trim(), mode: "insensitive" } };
+            }
+        }
+
+        return {
+            OR: [
+                { name: { contains: filter, mode: "insensitive" } },
+                { email: { contains: filter, mode: "insensitive" } },
+                { phone: { contains: filter, mode: "insensitive" } },
+                { cnpj: { contains: filter, mode: "insensitive" } },
+                { address: { contains: filter, mode: "insensitive" } },
+            ],
+        };
     }
 }

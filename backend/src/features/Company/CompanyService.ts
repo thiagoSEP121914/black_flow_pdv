@@ -1,6 +1,6 @@
 import { Company } from "@prisma/client";
 import { ICompanyRepository } from "./repositories/ICompanyRepository.js";
-import { SearchOutPut } from "../../core/interface/IRepository.js";
+import { SearchOutPut, SearchInput } from "../../core/interface/IRepository.js";
 import { NotFoundError } from "../../errors/NotFounError.js";
 import { CreateCompanyDto, UpdateCompanyDto } from "./dtos/index.js";
 
@@ -11,7 +11,7 @@ export class CompanyService {
         this.repository = repository;
     }
 
-    async findAll(params: { page?: number; per_page?: number }): Promise<SearchOutPut<Company>> {
+    async findAll(params: SearchInput): Promise<SearchOutPut<Company>> {
         return this.repository.findAll(params);
     }
 
