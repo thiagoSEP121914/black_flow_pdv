@@ -10,7 +10,10 @@
         "lint": "eslint . --ext .ts --fix",
         "format": "prettier --write .",
         "typecheck": "tsc --noEmit",
-        "check": "npm run lint && npm run typecheck"
+        "check": "npm run lint && npm run typecheck",
+        "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+        "test:watch": "npm run test -- --watch",
+        "test:coverage": "npm run test -- --coverage"
     },
     "keywords": [],
     "author": "",
