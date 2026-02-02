@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../shared/hooks/useAuth";
 import { handleLoginError } from "../error/handlerLoginError";
 
+import { Store } from "lucide-react";
+
 export function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -35,7 +37,14 @@ export function Login() {
     <div className="min-h-screen flex">
       <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
-          <div className="w-12 h-12 bg-cyan-400 rounded-lg mb-8"></div>
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white">
+              <Store size={24} />
+            </div>
+            <span className="text-2xl font-bold text-gray-900 tracking-tight">
+              SysPDV
+            </span>
+          </div>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Login</h1>
           <p className="text-gray-600 mb-10">
