@@ -36,8 +36,6 @@ export class ProductController extends Controller {
         this.productService = productService;
     }
 
-
-
     handle(): Router {
         this.route.get("/", async (req: Request, res: Response) => {
             const params: SearchInput = {
@@ -46,7 +44,7 @@ export class ProductController extends Controller {
                 sort_by: req.query.sort_by as string,
                 sort_dir: req.query.sort_dir as "asc" | "desc",
                 filter: req.query.filter as string,
-                companyId: req.user!.companyId
+                companyId: req.user!.companyId,
             };
 
             const result = await this.productService.findAll(params);

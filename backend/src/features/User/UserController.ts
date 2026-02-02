@@ -10,8 +10,6 @@ export class UserController extends Controller {
         this.service = service;
     }
 
-
-
     handle(): Router {
         this.route.get("/me", async (req: Request, res: Response) => {
             const userId = req.user?.userId;

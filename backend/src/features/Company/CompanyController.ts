@@ -33,8 +33,6 @@ export class CompanyController extends Controller {
     }
 
 
-
-
     handle(): Router {
         this.route.get("/", async (req: Request, res: Response) => {
             const userContext = req.user!; // Middleware garante que existe
@@ -51,6 +49,7 @@ export class CompanyController extends Controller {
 
             return res.status(200).json(result);
         });
+
         this.route.get("/:id", async (req: Request, res: Response) => {
             const userContext = req.user!;
             const id = req.params.id;
@@ -58,12 +57,14 @@ export class CompanyController extends Controller {
 
             return res.status(200).json(response);
         });
+
         this.route.post("/", async (req: Request, res: Response) => {
             const userContext = req.user!;
             const input = createCompanySchema.parse(req.body);
             const company = await this.companyService.save(userContext, input);
             res.status(201).json(company);
         });
+
         this.route.patch("/:id", async (req: Request, res: Response) => {
             const userContext = req.user!;
             const id = req.params.id;
@@ -71,6 +72,7 @@ export class CompanyController extends Controller {
             const company = await this.companyService.update(userContext, id, input);
             res.status(200).json(company);
         });
+
         this.route.delete("/:id", async (req: Request, res: Response) => {
             const userContext = req.user!;
             const id = req.params.id;

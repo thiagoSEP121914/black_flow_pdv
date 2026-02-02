@@ -1,4 +1,4 @@
-import { IStoreRepository } from "./Repositorie/IStoreRepository.js";
+import { IStoreRepository } from "./repositories/IStoreRepository.js";
 import { SearchInput, SearchOutPut } from "../../core/interface/IRepository.js";
 import { Store } from "@prisma/client";
 import { NotFoundError } from "../../errors/NotFounError.js";
@@ -28,30 +28,33 @@ export class StoreService {
         this.storeRepository = storeRepository;
     }
 
-    async createStore(ctx: UserContext, data: CreateStoreDTO): Promise<Store> {
-        return this.storeRepository.insert({
-            ...data,
-            companyId: ctx.companyId,
-            status: "active"
-        });
-    }
-
-    async getStores(params: SearchInput): Promise<SearchOutPut<Store>> {
+    async findAll(params: SearchInput): Promise<SearchOutPut<Store>> {
         return this.storeRepository.findAll(params);
     }
 
-    async getStoreById(ctx: UserContext, id: string): Promise<Store> {
+    async findStoreById(ctx: UserContext, id: string): Promise<Store> {
         const store = await this.storeRepository.findById(id);
+
         if (!store) throw new NotFoundError("Store not found");
 
         if (store.companyId !== ctx.companyId) {
             throw new NotFoundError("Store not found");
         }
+
         return store;
+    }
+
+    async createStore(ctx: UserContext, data: CreateStoreDTO): Promise<Store> {
+        return this.storeRepository.insert({
+            ...data,
+            companyId: ctx.companyId,
+            status: "active",
+        });
     }
 
     async updateStore(ctx: UserContext, id: string, data: UpdateStoreDTO): Promise<Store> {
         const store = await this.storeRepository.findById(id);
+
         if (!store) throw new NotFoundError("Store not found");
 
         if (store.companyId !== ctx.companyId) {
@@ -63,11 +66,13 @@ export class StoreService {
 
     async deleteStore(ctx: UserContext, id: string): Promise<void> {
         const store = await this.storeRepository.findById(id);
+
         if (!store) throw new NotFoundError("Store not found");
 
         if (store.companyId !== ctx.companyId) {
             throw new NotFoundError("Store not found");
         }
+
         await this.storeRepository.update({ ...store, status: "inactive" });
     }
 }

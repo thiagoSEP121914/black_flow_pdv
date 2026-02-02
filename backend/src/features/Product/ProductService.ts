@@ -3,7 +3,7 @@ import { IProductRepository } from "./repositories/IProductRepository.js";
 import { Product } from "@prisma/client";
 import { NotFoundError } from "../../errors/NotFounError.js";
 import { UserContext } from "../../core/types/UserContext.js";
-import { prisma } from "../../core/prisma.js";
+import { StoreService } from "../Store/StoreService.js";
 
 export interface CreateProductDTO {
     name: string;
@@ -31,9 +31,11 @@ export interface UpdateProductDTO {
 
 export class ProductService {
     private productRepository: IProductRepository;
+    private storeService: StoreService;
 
-    constructor(productRepository: IProductRepository) {
+    constructor(productRepository: IProductRepository, storeService: StoreService) {
         this.productRepository = productRepository;
+        this.storeService = storeService;
     }
 
     async findAll(params: SearchInput): Promise<SearchOutPut<Product>> {
@@ -59,9 +61,7 @@ export class ProductService {
             throw new Error("Store ID is required");
         }
 
-        const store = await prisma.store.findUnique({
-            where: { id: storeId },
-        });
+        const store = await this.storeService.findStoreById(ctx, storeId);
 
         if (!store) throw new NotFoundError("Store not found");
 
