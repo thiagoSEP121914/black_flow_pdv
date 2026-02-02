@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../shared/hooks/useAuth";
 import { handleLoginError } from "../error/handlerLoginError";
 
+import { Store } from "lucide-react";
+
 export function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -35,7 +37,14 @@ export function Login() {
     <div className="min-h-screen flex">
       <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
-          <div className="w-12 h-12 bg-cyan-400 rounded-lg mb-8"></div>
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white">
+              <Store size={24} />
+            </div>
+            <span className="text-2xl font-bold text-gray-900 tracking-tight">
+              SysPDV
+            </span>
+          </div>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Login</h1>
           <p className="text-gray-600 mb-10">
@@ -101,177 +110,66 @@ export function Login() {
         </div>
       </div>
 
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-50 items-center justify-center p-12">
-        <svg viewBox="0 0 500 500" className="w-full max-w-lg h-auto">
-          <rect x="20" y="100" width="460" height="5" fill="#e5e7eb" />
-          <rect x="20" y="180" width="460" height="5" fill="#e5e7eb" />
+      <div className="hidden lg:flex flex-1 bg-emerald-600 items-center justify-center p-12 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-64 h-64 rounded-full bg-white blur-3xl" />
+          <div className="absolute bottom-20 right-20 w-96 h-96 rounded-full bg-emerald-300 blur-3xl" />
+        </div>
 
-          <g>
-            <rect
-              x="50"
-              y="280"
-              width="180"
-              height="120"
-              rx="8"
-              fill="#1f2937"
-            />
-            <rect
-              x="60"
-              y="290"
-              width="160"
-              height="80"
-              rx="4"
-              fill="#34d399"
-            />
-            <rect
-              x="70"
-              y="300"
-              width="140"
-              height="60"
-              rx="2"
-              fill="#10b981"
-            />
-            <text
-              x="140"
-              y="335"
-              fontSize="24"
-              fill="#fff"
-              fontWeight="bold"
-              textAnchor="middle"
-            >
-              R$ 0,00
-            </text>
+        <div className="relative z-10 text-center space-y-8 max-w-lg">
+          <div className="relative mx-auto w-80 h-80">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-64 h-48 bg-white/10 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 overflow-hidden">
+                <div className="h-6 bg-white/10 flex items-center gap-1.5 px-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+                </div>
+                <div className="p-4 space-y-3">
+                  <div className="h-4 bg-white/20 rounded w-3/4" />
+                  <div className="h-3 bg-white/10 rounded w-full" />
+                  <div className="h-3 bg-white/10 rounded w-5/6" />
+                  <div className="flex gap-2 mt-4">
+                    <div className="h-8 w-16 bg-emerald-500 rounded" />
+                    <div className="h-8 w-16 bg-white/10 rounded" />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            <g>
-              <circle cx="80" cy="385" r="6" fill="#6b7280" />
-              <circle cx="100" cy="385" r="6" fill="#6b7280" />
-              <circle cx="120" cy="385" r="6" fill="#6b7280" />
-              <circle cx="140" cy="385" r="6" fill="#6b7280" />
-              <circle cx="160" cy="385" r="6" fill="#6b7280" />
-              <circle cx="180" cy="385" r="6" fill="#6b7280" />
-              <circle cx="200" cy="385" r="6" fill="#6b7280" />
-            </g>
-          </g>
+            <div className="absolute -top-4 right-8 w-16 h-16 bg-white/10 rounded-xl backdrop-blur-md flex items-center justify-center animate-pulse">
+              <div className="w-8 h-8 bg-emerald-400 rounded-lg" />
+            </div>
+            <div className="absolute bottom-8 -left-4 w-14 h-14 bg-white/10 rounded-xl backdrop-blur-md flex items-center justify-center animate-pulse delay-500">
+              <div className="w-7 h-7 bg-emerald-300 rounded-lg" />
+            </div>
+          </div>
 
-          <g>
-            <circle cx="330" cy="180" r="35" fill="#fbbf77" />
-            <path
-              d="M 295 175 Q 295 140 330 140 Q 365 140 365 175 L 365 185 Q 365 165 330 165 Q 295 165 295 185 Z"
-              fill="#1f2937"
-            />
-            <path
-              d="M 295 215 L 280 250 L 280 340 L 330 340 L 380 340 L 380 250 L 365 215 Z"
-              fill="#3b82f6"
-            />
-            <ellipse
-              cx="265"
-              cy="270"
-              rx="35"
-              ry="15"
-              fill="#fbbf77"
-              transform="rotate(-25 265 270)"
-            />
-            <ellipse
-              cx="395"
-              cy="270"
-              rx="35"
-              ry="15"
-              fill="#fbbf77"
-              transform="rotate(25 395 270)"
-            />
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold text-white">
+              Gerencie seu negócio
+            </h2>
+            <p className="text-emerald-100 text-lg">
+              Sistema completo de PDV para controle de vendas, estoque e financeiro.
+            </p>
+          </div>
 
-            <circle cx="240" cy="300" r="12" fill="#fbbf77" />
-            <path
-              d="M 240 300 L 220 310 L 215 305 L 235 295 Z"
-              fill="#fbbf77"
-            />
-          </g>
-
-          <g>
-            <rect
-              x="260"
-              y="360"
-              width="50"
-              height="30"
-              rx="4"
-              fill="#dc2626"
-            />
-            <rect
-              x="265"
-              y="365"
-              width="40"
-              height="20"
-              rx="2"
-              fill="#374151"
-            />
-          </g>
-
-          <g>
-            <rect
-              x="380"
-              y="320"
-              width="40"
-              height="50"
-              rx="3"
-              fill="#f59e0b"
-            />
-            <rect
-              x="385"
-              y="325"
-              width="30"
-              height="8"
-              fill="#fff"
-              opacity="0.3"
-            />
-
-            <rect
-              x="430"
-              y="310"
-              width="40"
-              height="60"
-              rx="3"
-              fill="#10b981"
-            />
-            <rect
-              x="435"
-              y="315"
-              width="30"
-              height="8"
-              fill="#fff"
-              opacity="0.3"
-            />
-          </g>
-
-          <rect x="30" y="400" width="440" height="12" rx="6" fill="#9ca3af" />
-          <rect x="30" y="412" width="440" height="40" fill="#6b7280" />
-
-          <g opacity="0.3">
-            <circle cx="120" cy="150" r="20" fill="#34d399" />
-            <text x="120" y="158" fontSize="20" fill="#fff" textAnchor="middle">
-              $
-            </text>
-            <rect
-              x="350"
-              y="130"
-              width="40"
-              height="28"
-              rx="4"
-              fill="#3b82f6"
-            />
-            <rect x="355" y="135" width="10" height="8" rx="1" fill="#fbbf77" />
-          </g>
-
-          <text
-            x="250"
-            y="80"
-            fontSize="28"
-            fill="#1f2937"
-            fontWeight="bold"
-            textAnchor="middle"
-          >
-            Seu PDV Moderno
-          </text>
-        </svg>
+          {/* Features */}
+          <div className="flex justify-center gap-6 text-emerald-100 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-white" />
+              Multi-lojas
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-white" />
+              Relatórios
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-white" />
+              Controle total
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
