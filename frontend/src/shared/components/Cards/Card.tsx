@@ -15,7 +15,7 @@ export function Card({
 }: ICardProps) {
   return (
     <div
-      className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-shadow ${className} cursor-pointer`}
     >
       {(title || actions || icon) && (
         <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100">

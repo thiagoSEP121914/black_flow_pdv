@@ -31,7 +31,7 @@ export const Dashboard = () => {
     <div className="space-y-6">
       {/* Top Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-5 hover:shadow-lg transition-shadow">
+        <Card className="p-5">
           <div className="flex items-start justify-between">
             <div className="flex flex-col flex-1">
               <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
@@ -50,7 +50,7 @@ export const Dashboard = () => {
           </div>
         </Card>
 
-        <Card className="p-5 hover:shadow-lg transition-shadow">
+        <Card className="p-5">
           <div className="flex items-start justify-between">
             <div className="flex flex-col flex-1">
               <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
@@ -67,7 +67,7 @@ export const Dashboard = () => {
           </div>
         </Card>
 
-        <Card className="p-5 hover:shadow-lg transition-shadow">
+        <Card className="p-5">
           <div className="flex items-start justify-between">
             <div className="flex flex-col flex-1">
               <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
@@ -84,7 +84,7 @@ export const Dashboard = () => {
           </div>
         </Card>
 
-        <Card className="p-5 hover:shadow-lg transition-shadow">
+        <Card className="p-5">
           <div className="flex items-start justify-between">
             <div className="flex flex-col flex-1">
               <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
