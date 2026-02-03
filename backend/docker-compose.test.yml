@@ -3,7 +3,12 @@ services:
     image: mongo:latest
     ports:
       - "27018:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=testuser
-      - MONGO_INITDB_ROOT_PASSWORD=testpassword
+    command: [ "--replSet", "rs0", "--bind_ip_all" ]
+    healthcheck:
+      test: |
+        mongosh --eval "try { rs.status() } catch (e) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]}) }"
+      interval: 5s
+      timeout: 30s
+      start_period: 10s
+      retries: 30
     restart: always

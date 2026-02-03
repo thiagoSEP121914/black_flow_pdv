@@ -1,59 +1,57 @@
+import { execSync } from "child_process";
 
-import { execSync } from 'child_process';
-import net from 'net';
-
-const waitForPort = (port: number, host: string = 'localhost', timeout: number = 20000): Promise<void> => {
+const waitForReplicaSet = (timeout: number = 60000): Promise<void> => {
     return new Promise((resolve, reject) => {
         const startTime = Date.now();
 
-        const tryConnect = () => {
-            const socket = new net.Socket();
+        const checkReplicaSet = () => {
+            try {
+                // Check if replica set is initialized and ready
+                const result = execSync(
+                    'docker exec backend-mongo_test-1 mongosh --quiet --eval "rs.status().ok"',
+                    { encoding: "utf-8", timeout: 5000 }
+                ).trim();
 
-            socket.setTimeout(1000);
+                if (result === "1") {
+                    resolve();
+                    return;
+                }
+            } catch {
+                // Replica set not ready yet, try to initialize it
+                try {
+                    execSync(
+                        'docker exec backend-mongo_test-1 mongosh --quiet --eval "rs.initiate({_id: \'rs0\', members: [{_id: 0, host: \'localhost:27017\'}]})"',
+                        { encoding: "utf-8", timeout: 5000 }
+                    );
+                } catch {
+                    // Ignore - might already be initiated or not ready
+                }
+            }
 
-            socket.on('connect', () => {
-                socket.destroy();
-                resolve();
-            });
-
-            socket.on('timeout', () => {
-                socket.destroy();
-                checkRetry();
-            });
-
-            socket.on('error', () => {
-                socket.destroy();
-                checkRetry();
-            });
-
-            socket.connect(port, host);
-        };
-
-        const checkRetry = () => {
             if (Date.now() - startTime >= timeout) {
-                reject(new Error(`Timeout waiting for port ${port}`));
+                reject(new Error("Timeout waiting for MongoDB replica set"));
             } else {
-                setTimeout(tryConnect, 1000);
+                setTimeout(checkReplicaSet, 1000);
             }
         };
 
-        tryConnect();
+        // Give MongoDB a moment to start before checking
+        setTimeout(checkReplicaSet, 2000);
     });
 };
 
 export default async () => {
-    console.log('\n🚀 Starting Test Environment...');
+    console.log("\n🚀 Starting Test Environment...");
 
     try {
-        execSync('docker compose -f docker-compose.test.yml up -d', { stdio: 'inherit' });
+        execSync("docker compose -f docker-compose.test.yml up -d", { stdio: "inherit" });
 
-        // Wait for Mongo to be ready on port 27018
-        console.log('⏳ Waiting for MongoDB to be ready...');
-        await waitForPort(27018);
-        console.log('✅ MongoDB is ready!');
-
+        // Wait for Mongo replica set to be ready
+        console.log("⏳ Waiting for MongoDB replica set to be ready...");
+        await waitForReplicaSet();
+        console.log("✅ MongoDB replica set is ready!");
     } catch (error) {
-        console.error('❌ Failed to start test environment:', error);
+        console.error("❌ Failed to start test environment:", error);
         process.exit(1);
     }
 };

@@ -92,9 +92,10 @@ export class UserRepositoryImpl implements IUserRepository {
     }
 
     async update(model: Partial<User>): Promise<User> {
+        const { id, createdAt, updatedAt, ...updateData } = model;
         return await this.prisma.user.update({
-            where: { id: model.id },
-            data: model,
+            where: { id },
+            data: updateData,
         });
     }
 
