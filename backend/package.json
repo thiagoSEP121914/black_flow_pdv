@@ -13,7 +13,8 @@
         "check": "npm run lint && npm run typecheck",
         "test": "NODE_OPTIONS=--experimental-vm-modules jest",
         "test:watch": "npm run test -- --watch",
-        "test:coverage": "npm run test -- --coverage"
+        "test:coverage": "npm run test -- --coverage",
+        "test:int": "dotenv -e .env.test -- jest -i --testMatch '**/*.int.spec.ts'"
     },
     "keywords": [],
     "author": "",
@@ -49,6 +50,7 @@
         "@types/swagger-ui-express": "^4.1.8",
         "@typescript-eslint/eslint-plugin": "^8.46.4",
         "@typescript-eslint/parser": "^8.46.4",
+        "dotenv-cli": "^11.0.0",
         "eslint": "^9.39.2",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.4",
@@ -57,6 +59,7 @@
         "prettier": "^3.7.4",
         "prisma": "^6.19.0",
         "ts-jest": "^29.4.6",
+        "ts-node": "^10.9.2",
         "ts-node-dev": "^2.0.0",
         "tsx": "^4.20.6",
         "typescript": "^5.9.3",
