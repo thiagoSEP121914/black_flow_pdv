@@ -1,26 +1,26 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 const config = {
-  preset: 'ts-jest/presets/default-esm',
-  testEnvironment: 'node',
+    preset: "ts-jest/presets/default-esm",
+    testEnvironment: "node",
 
-  extensionsToTreatAsEsm: ['.ts'],
+    extensionsToTreatAsEsm: [".ts"],
 
-  transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      {
-        useESM: true,
-      },
-    ],
-  },
+    transform: {
+        "^.+\\.tsx?$": [
+            "ts-jest",
+            {
+                useESM: true,
+            },
+        ],
+    },
 
-  moduleNameMapper: {
-    // 👇 ESSENCIAL pra NodeNext
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
+    moduleNameMapper: {
+        // 👇 ESSENCIAL pra NodeNext
+        "^(\\.{1,2}/.*)\\.js$": "$1",
+    },
 
-  globalSetup: './tests/setup/global-setup.ts',
-  globalTeardown: './tests/setup/global-teardown.ts',
+    globalSetup: "./tests/setup/global-setup.ts",
+    globalTeardown: "./tests/setup/global-teardown.ts",
 };
 
 module.exports = config;

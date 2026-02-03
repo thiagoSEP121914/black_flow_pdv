@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   mongo_test:
     image: mongo:latest
