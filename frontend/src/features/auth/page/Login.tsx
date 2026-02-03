@@ -1,9 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  loginSchema,
-  type LoginInput,
-} from "@/features/auth/schemas/login.schema";
+import { loginSchema, type LoginInput } from "@/features/auth/schemas/login.schema";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../shared/hooks/useAuth";
@@ -25,7 +22,7 @@ export function Login() {
 
   const onSubmit = async (data: LoginInput) => {
     try {
-      await login(data); // ou login retorna void, então use user direto do context depois
+      await login(data);
       toast.success("Login realizado com sucesso!");
       navigate("/dashboard");
     } catch (error) {
@@ -35,21 +32,23 @@ export function Login() {
 
   return (
     <div className="min-h-screen flex">
+      {/* ESQUERDA */}
       <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
+          {/* Marca */}
           <div className="flex items-center gap-3 mb-10">
             <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white">
               <Store size={24} />
             </div>
+
+            {/* ✅ trocado aqui */}
             <span className="text-2xl font-bold text-gray-900 tracking-tight">
-              SysPDV
+              NextFlow PDV
             </span>
           </div>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Login</h1>
-          <p className="text-gray-600 mb-10">
-            Cresça seu negócio com confiança.
-          </p>
+          <p className="text-gray-600 mb-10">Cresça seu negócio com confiança.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
@@ -95,7 +94,6 @@ export function Login() {
             </button>
           </form>
 
-          {/* Footer text */}
           <div className="mt-8 text-sm text-gray-600">
             <p>
               Ainda não tem acesso?{" "}
@@ -110,51 +108,33 @@ export function Login() {
         </div>
       </div>
 
+      {/* DIREITA */}
       <div className="hidden lg:flex flex-1 bg-emerald-600 items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-20 w-64 h-64 rounded-full bg-white blur-3xl" />
           <div className="absolute bottom-20 right-20 w-96 h-96 rounded-full bg-emerald-300 blur-3xl" />
         </div>
 
-        <div className="relative z-10 text-center space-y-8 max-w-lg">
-          <div className="relative mx-auto w-80 h-80">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-64 h-48 bg-white/10 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 overflow-hidden">
-                <div className="h-6 bg-white/10 flex items-center gap-1.5 px-3">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-                </div>
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-white/20 rounded w-3/4" />
-                  <div className="h-3 bg-white/10 rounded w-full" />
-                  <div className="h-3 bg-white/10 rounded w-5/6" />
-                  <div className="flex gap-2 mt-4">
-                    <div className="h-8 w-16 bg-emerald-500 rounded" />
-                    <div className="h-8 w-16 bg-white/10 rounded" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute -top-4 right-8 w-16 h-16 bg-white/10 rounded-xl backdrop-blur-md flex items-center justify-center animate-pulse">
-              <div className="w-8 h-8 bg-emerald-400 rounded-lg" />
-            </div>
-            <div className="absolute bottom-8 -left-4 w-14 h-14 bg-white/10 rounded-xl backdrop-blur-md flex items-center justify-center animate-pulse delay-500">
-              <div className="w-7 h-7 bg-emerald-300 rounded-lg" />
+        <div className="relative z-10 text-center space-y-8 max-w-2xl">
+          {/* imagem maior */}
+          <div className="mx-auto w-[420px] xl:w-[560px] max-w-[92%]">
+            <div className="rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl p-5">
+              <img
+                src="/Mascote.jpeg"
+                alt="Mascote NextFlow"
+                className="w-full h-auto rounded-2xl object-contain"
+                draggable={false}
+              />
             </div>
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold text-white">
-              Gerencie seu negócio
-            </h2>
+            <h2 className="text-3xl font-bold text-white">Gerencie seu negócio</h2>
             <p className="text-emerald-100 text-lg">
               Sistema completo de PDV para controle de vendas, estoque e financeiro.
             </p>
           </div>
 
-          {/* Features */}
           <div className="flex justify-center gap-6 text-emerald-100 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-white" />
@@ -170,6 +150,7 @@ export function Login() {
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
