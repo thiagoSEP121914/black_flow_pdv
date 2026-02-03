@@ -1,4 +1,3 @@
-
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "@jest/globals";
 import { PrismaClient, Product } from "@prisma/client";
 import { ProductRepositoryImpl } from "../repositories/ProductRepository.js";
@@ -130,7 +129,7 @@ describe("ProductRepository Integration Tests", () => {
                     { name: "Apple", salePrice: 10, companyId, storeId },
                     { name: "Banana", salePrice: 5, companyId, storeId },
                     { name: "Cherry", salePrice: 15, companyId, storeId },
-                ]
+                ],
             });
         });
 
@@ -176,7 +175,7 @@ describe("ProductRepository Integration Tests", () => {
             const updated = await repository.update({
                 id: product.id,
                 name: "New Name",
-                salePrice: 75
+                salePrice: 75,
             });
 
             expect(updated.name).toBe("New Name");
@@ -231,16 +230,15 @@ describe("ProductRepository Integration Tests", () => {
         it("should return products for specific company", async () => {
             const otherCompany = await prisma.company.create({ data: { name: "Other", status: "active" } });
             await prisma.product.create({
-                data: { name: "Other Product", salePrice: 10, companyId: otherCompany.id, storeId }
+                data: { name: "Other Product", salePrice: 10, companyId: otherCompany.id, storeId },
             });
             const otherStore = await prisma.store.create({ data: { name: "Other Store", companyId: otherCompany.id } });
             await prisma.product.create({
-                data: { name: "Other Product", salePrice: 10, companyId: otherCompany.id, storeId: otherStore.id }
+                data: { name: "Other Product", salePrice: 10, companyId: otherCompany.id, storeId: otherStore.id },
             });
 
-
             await prisma.product.create({
-                data: { name: "My Product", salePrice: 10, companyId, storeId }
+                data: { name: "My Product", salePrice: 10, companyId, storeId },
             });
 
             const results = await repository.findByCompanyId(companyId);
@@ -248,5 +246,4 @@ describe("ProductRepository Integration Tests", () => {
             expect(results[0].name).toBe("My Product");
         });
     });
-
 });
