@@ -2,8 +2,13 @@ import { Button } from "@/shared/components/ui/Button";
 import { Input } from "@/shared/components/Input/Input";
 import type { AllSettings, Role } from "@/features/settings/types/settings";
 import type { CompanyTab } from "@/features/settings/types/ui";
-import { maskCnpj, maskPhoneBR } from "@/features/settings/utils/masks";
-import { Divider, LockHint, TabPill, ToggleRow } from "@/features/settings/components/SettingsUI";
+import { maskCnpj, maskPhoneBR } from "@/shared/utils/masks";
+import {
+  Divider,
+  LockHint,
+  TabPill,
+  ToggleRow,
+} from "@/features/settings/components/SettingsUI";
 
 type CompanySectionProps = {
   draft: AllSettings;
