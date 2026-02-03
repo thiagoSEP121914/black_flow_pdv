@@ -7,21 +7,22 @@ const waitForReplicaSet = (timeout: number = 60000): Promise<void> => {
         const checkReplicaSet = () => {
             try {
                 // Check if replica set is initialized and ready
-                const result = execSync(
-                    'docker exec backend-mongo_test-1 mongosh --quiet --eval "rs.status().ok"',
-                    { encoding: "utf-8", timeout: 5000 }
-                ).trim();
+                const result = execSync('docker exec backend-mongo_test-1 mongosh --quiet --eval "rs.status().ok"', {
+                    encoding: "utf-8",
+                    timeout: 5000,
+                }).trim();
 
                 if (result === "1") {
                     resolve();
+
                     return;
                 }
             } catch {
                 // Replica set not ready yet, try to initialize it
                 try {
                     execSync(
-                        'docker exec backend-mongo_test-1 mongosh --quiet --eval "rs.initiate({_id: \'rs0\', members: [{_id: 0, host: \'localhost:27017\'}]})"',
-                        { encoding: "utf-8", timeout: 5000 }
+                        "docker exec backend-mongo_test-1 mongosh --quiet --eval \"rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]})\"",
+                        { encoding: "utf-8", timeout: 5000 },
                     );
                 } catch {
                     // Ignore - might already be initiated or not ready

@@ -14,7 +14,9 @@
         "test": "NODE_OPTIONS=--experimental-vm-modules jest",
         "test:watch": "npm run test -- --watch",
         "test:coverage": "npm run test -- --coverage",
-        "test:int": "dotenv -e .env.test -- jest -i --testMatch '**/*.int.spec.ts'"
+        "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --testPathIgnorePatterns='.int.spec.ts'",
+        "test:int": "dotenv -e .env.test -- jest -i --testMatch '**/*.int.spec.ts'",
+        "test:all": "npm run test:unit && npm run test:int"
     },
     "keywords": [],
     "author": "",

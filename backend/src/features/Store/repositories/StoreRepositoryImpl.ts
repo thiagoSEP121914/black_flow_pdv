@@ -81,7 +81,7 @@ export class StoreRepositoryImpl implements IStoreRepository {
 
         if (filter.includes("=")) {
             const [key, value] = filter.split("=");
-            const validKeys = ["name", "description", "barcode", "location"];
+            const validKeys = ["name", "cnpj", "phone", "email", "address"];
 
             if (validKeys.includes(key.trim())) {
                 return { [key.trim()]: { contains: value.trim(), mode: "insensitive" } };
@@ -91,8 +91,7 @@ export class StoreRepositoryImpl implements IStoreRepository {
         return {
             OR: [
                 { name: { contains: filter, mode: "insensitive" } },
-                { description: { contains: filter, mode: "insensitive" } },
-                { barcode: { contains: filter, mode: "insensitive" } },
+                { address: { contains: filter, mode: "insensitive" } },
             ],
         };
     }
