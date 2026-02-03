@@ -34,6 +34,7 @@ export const MainLayout = () => {
       title: "Configurações",
       subtitle: "Personalize sua experiência",
     },
+    "/agenda": { title: "Agenda", subtitle: "Gerencie seus eventos e tarefas" },
   };
   const { title, subtitle } = pageTitles[location.pathname] || {
     title: "Sistema",

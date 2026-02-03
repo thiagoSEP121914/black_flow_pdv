@@ -10,6 +10,7 @@ import {
   Store,
   Settings,
   LogOut,
+  CalendarDays,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { NavLink } from "react-router-dom";
@@ -20,6 +21,7 @@ export function SideBar() {
     { icon: ShoppingCart, label: "PDV", path: "/pdv" },
     { icon: Package, label: "Produtos", path: "/products" },
     { icon: Tag, label: "Categorias", path: "/categories" },
+    { icon: CalendarDays, label: "Agenda", path: "/agenda" }, 
     { icon: Users, label: "Clientes", path: "/clients" },
     { icon: FileText, label: "Vendas", path: "/sales" },
     { icon: DollarSign, label: "Caixa", path: "/cashier" },
