@@ -13,13 +13,7 @@ export const maskCnpj = (value: string) => {
 export const maskPhoneBR = (value: string) => {
   const d = digitsOnly(value).slice(0, 11);
   if (d.length <= 10) {
-    // (11) 9999-9999
-    return d
-      .replace(/^(\d{2})(\d)/, "($1) $2")
-      .replace(/(\d{4})(\d)/, "$1-$2");
+    return d.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{4})(\d)/, "$1-$2");
   }
-  // (11) 99999-9999
-  return d
-    .replace(/^(\d{2})(\d)/, "($1) $2")
-    .replace(/(\d{5})(\d)/, "$1-$2");
+  return d.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
 };
