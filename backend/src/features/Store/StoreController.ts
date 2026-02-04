@@ -37,17 +37,19 @@ export class StoreController extends Controller {
                 sort_by: req.query.sort_by as string,
                 sort_dir: req.query.sort_dir as "asc" | "desc",
                 filter: req.query.filter as string,
-                companyId: req.user!.companyId
+                companyId: req.user!.companyId,
             };
 
-            const result = await this.storeService.getStores(params);
+            const result = await this.storeService.findAll(params);
+
             return res.status(200).json(result);
         });
 
         this.route.get("/:id", async (req: Request, res: Response) => {
             const userContext = req.user!;
             const id = req.params.id;
-            const response = await this.storeService.getStoreById(userContext, id);
+            const response = await this.storeService.findStoreById(userContext, id);
+
             return res.status(200).json(response);
         });
 
