@@ -18,7 +18,7 @@ import { Finance } from "@/features/Finance/page/Finance";
 import { Store } from "@/features/store/page/Store";
 import { Setting } from "@/features/settings/page/Setting";
 import Promotions from "@/features/promotions/page/Promotions";
-
+import Agenda from "@/features/agenda/page/Agenda";
 // Rota protegida
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -62,7 +62,7 @@ export const AppRoutes = () => {
           <Route path="/finance" element={<Finance />} />
           <Route path="/store" element={<Store />} />
           <Route path="/settings" element={<Setting />} />
-          <Route path="/promotions" element={<Promotions />} />
+
           {/* Adicione outras rotas aqui conforme for criando */}
         </Route>
 
