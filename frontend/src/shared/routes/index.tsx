@@ -17,6 +17,7 @@ import { Cashier } from "@/features/cashier/page/Cashier";
 import { Finance } from "@/features/Finance/page/Finance";
 import { Store } from "@/features/store/page/Store";
 import { Setting } from "@/features/settings/page/Setting";
+import Promotions from "@/features/promotions/page/Promotions";
 
 // Rota protegida
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -55,13 +56,13 @@ export const AppRoutes = () => {
           <Route path="/pdv" element={<Pos />} />
           <Route path="/products" element={<Product />} />
           <Route path="/categories" element={<Categorie />} />
-          <Route path="/Clients" element={<Client />} />
+          <Route path="/clients" element={<Client />} />
           <Route path="/sales" element={<Sale />} />
           <Route path="/cashier" element={<Cashier />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/store" element={<Store />} />
           <Route path="/settings" element={<Setting />} />
-
+          <Route path="/promotions" element={<Promotions />} />
           {/* Adicione outras rotas aqui conforme for criando */}
         </Route>
 

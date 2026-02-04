@@ -10,6 +10,7 @@ import {
   Store,
   Settings,
   LogOut,
+  BadgePercent,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { NavLink } from "react-router-dom";
@@ -24,6 +25,10 @@ export function SideBar() {
     { icon: FileText, label: "Vendas", path: "/sales" },
     { icon: DollarSign, label: "Caixa", path: "/cashier" },
     { icon: BarChart3, label: "Financeiro", path: "/finance" },
+
+    
+    { icon: BadgePercent, label: "Promoções", path: "/promotions" },
+
     { icon: Store, label: "Lojas", path: "/store" },
     { icon: Settings, label: "Configurações", path: "/settings" },
   ];
@@ -35,21 +40,21 @@ export function SideBar() {
       {/* Logo */}
       <div className="h-24 flex flex-col justify-center px-6 border-b border-emerald-400">
         <h1 className="text-2xl font-bold">Next Flow PDV</h1>
-        <p className="text-emerald-100 text-xs mt-1">
-          Sistema de Gerenciamento
-        </p>
+        <p className="text-emerald-100 text-xs mt-1">Sistema de Gerenciamento</p>
       </div>
 
-      {/* Navegação Dinâmica */}
+      {/* Navegação */}
       <nav className="flex-1 py-4 overflow-y-auto">
         {menuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            className={({ isActive }) =>
-              `w-full flex items-center gap-3 px-6 py-3 transition-all cursor-pointer hover:bg-emerald-400 hover:bg-opacity-20 text-emerald-50 ${isActive ? "bg-emerald-600 bg-opacity-40" : ""
-              }`
-            }
+            className={({ isActive }) => {
+              const base =
+                "w-full flex items-center gap-3 px-6 py-3 transition-all cursor-pointer text-emerald-50 hover:bg-emerald-400 hover:bg-opacity-20";
+              const active = "bg-emerald-600 bg-opacity-40";
+              return `${base} ${isActive ? active : ""}`;
+            }}
           >
             <item.icon size={20} />
             <span className="font-medium">{item.label}</span>

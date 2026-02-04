@@ -34,6 +34,7 @@ export const MainLayout = () => {
       title: "Configurações",
       subtitle: "Personalize sua experiência",
     },
+    "/Promotions": { title: "Promoções", subtitle: "Gerencie ofertas, cupons e regras promocionais" },
   };
   const { title, subtitle } = pageTitles[location.pathname] || {
     title: "Sistema",
