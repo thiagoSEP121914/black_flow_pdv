@@ -187,14 +187,27 @@ model Cashier {
   @@index([userId])
 }
 
+enum PaymentMethod {
+  CASH
+  CREDIT
+  DEBIT
+  PIX
+}
+
+enum SaleStatus {
+  COMPLETED
+  CANCELED
+  REFUNDED
+  PENDING
+}
+
 model Sale {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   date          DateTime @default(now())
   total         Int
   discount      Int     @default(0)
-  paymentMethod String
-  status        String  @default("completed")
-
+  paymentMethod PaymentMethod
+  status        SaleStatus @default(COMPLETED)
   companyId String  @db.ObjectId
   company   Company @relation(fields: [companyId], references: [id])
 

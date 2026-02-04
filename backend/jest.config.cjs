@@ -18,6 +18,9 @@ const config = {
     // 👇 ESSENCIAL pra NodeNext
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+
+  globalSetup: './tests/setup/global-setup.ts',
+  globalTeardown: './tests/setup/global-teardown.ts',
 };
 
 module.exports = config;
