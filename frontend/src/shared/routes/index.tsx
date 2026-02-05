@@ -62,7 +62,8 @@ export const AppRoutes = () => {
           <Route path="/finance" element={<Finance />} />
           <Route path="/store" element={<Store />} />
           <Route path="/settings" element={<Setting />} />
-
+          <Route path="/promotions" element={<Promotions />} />
+          <Route path="/agenda" element={<Agenda />} />
           {/* Adicione outras rotas aqui conforme for criando */}
         </Route>
 
