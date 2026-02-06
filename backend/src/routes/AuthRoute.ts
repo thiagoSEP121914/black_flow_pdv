@@ -4,6 +4,7 @@ import { companyController } from "../features/Company/index.js";
 import { productController } from "../features/Product/index.js";
 import { storeController } from "../features/Store/index.js";
 import { categoryController } from "../features/Category/index.js";
+import { saleController } from "../features/Sale/index.js";
 
 class AuthRouter {
     private router: Router;
@@ -18,8 +19,10 @@ class AuthRouter {
         this.router.use("/products", productController.handle());
         this.router.use("/stores", storeController.handle());
         this.router.use("/categories", categoryController.handle());
+        this.router.use("/sales", saleController.handle());
         return this.router;
     }
 }
 const authRouter = new AuthRouter();
 export default authRouter.routes();
+
