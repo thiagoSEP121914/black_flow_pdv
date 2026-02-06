@@ -12,6 +12,8 @@ import {
   LogOut,
   BadgePercent,
   CalendarDays,
+  Lightbulb,
+
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { NavLink } from "react-router-dom";
@@ -27,10 +29,8 @@ export function SideBar() {
     { icon: FileText, label: "Vendas", path: "/sales" },
     { icon: DollarSign, label: "Caixa", path: "/cashier" },
     { icon: BarChart3, label: "Financeiro", path: "/finance" },
-
-    
+    { icon: Lightbulb, label: "Estratégia", path: "/strategy" },
     { icon: BadgePercent, label: "Promoções", path: "/promotions" },
-
     { icon: Store, label: "Lojas", path: "/store" },
     { icon: Settings, label: "Configurações", path: "/settings" },
   ];

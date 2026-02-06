@@ -27,6 +27,10 @@ export const Button: React.FC<ButtonProps> = ({
       "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive",
     outlined:
       "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-primary",
+
+    // alias “outline” (pra não quebrar quando você usar)
+    outline:
+      "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-primary",
   };
 
   const sizes = {
