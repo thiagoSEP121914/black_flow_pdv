@@ -43,7 +43,7 @@ export function Login() {
 
             {/* ✅ trocado aqui */}
             <span className="text-2xl font-bold text-gray-900 tracking-tight">
-              NextFlow PDV
+              NextFlow ERP
             </span>
           </div>
 
