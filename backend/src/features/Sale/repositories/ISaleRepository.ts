@@ -9,9 +9,12 @@ export interface IFindByDateRangeInput {
 
 export interface IFindSaleByStatusInput {
     status: SaleStatus;
+    companyId: string;
 }
 
 export interface ISaleRepository extends IRepository<Sale, Partial<Sale>> {
-    findByDateRange(findByDateRangeInput: IFindByDateRangeInput): Promise<Sale>;
-    findByStatus(findByStatus: IFindSaleByStatusInput): Promise<Sale[]>;
+    findByDateRange(input: IFindByDateRangeInput): Promise<Sale[]>;
+    findByStatus(input: IFindSaleByStatusInput): Promise<Sale[]>;
+    findByUserId(userId: string, companyId: string): Promise<Sale[]>;
+    findByCustomerId(customerId: string, companyId: string): Promise<Sale[]>;
 }
