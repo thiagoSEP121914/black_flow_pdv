@@ -1,3 +1,5 @@
+// src/shared/components/SideBar/SideBar.tsx
+import { useEffect, useMemo, useState } from "react";
 import {
   Home,
   ShoppingCart,
@@ -10,70 +12,150 @@ import {
   Store,
   Settings,
   LogOut,
-  BadgePercent,
   CalendarDays,
+  Percent,
   Lightbulb,
-
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+
+const STORAGE_KEY = "nextflow.sidebar.collapsed";
 
 export function SideBar() {
-  const menuItems = [
-    { icon: Home, label: "Dashboard", path: "/dashboard" },
-    { icon: ShoppingCart, label: "PDV", path: "/pdv" },
-    { icon: Package, label: "Produtos", path: "/products" },
-    { icon: Tag, label: "Categorias", path: "/categories" },
-    { icon: CalendarDays, label: "Agenda", path: "/agenda" }, 
-    { icon: Users, label: "Clientes", path: "/clients" },
-    { icon: FileText, label: "Vendas", path: "/sales" },
-    { icon: DollarSign, label: "Caixa", path: "/cashier" },
-    { icon: BarChart3, label: "Financeiro", path: "/finance" },
-    { icon: Lightbulb, label: "Estratégia", path: "/strategy" },
-    { icon: BadgePercent, label: "Promoções", path: "/promotions" },
-    { icon: Store, label: "Lojas", path: "/store" },
-    { icon: Settings, label: "Configurações", path: "/settings" },
-  ];
-
   const { logout } = useAuth();
 
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
+    } catch {
+      // ignore
+    }
+
+    // opcional: avisa o layout (caso você queira ajustar padding dinamicamente)
+    window.dispatchEvent(
+      new CustomEvent("nextflow:sidebar", { detail: { collapsed } })
+    );
+  }, [collapsed]);
+
+  const menuItems = useMemo(
+    () => [
+      { icon: Home, label: "Dashboard", path: "/dashboard" },
+      { icon: ShoppingCart, label: "PDV", path: "/pdv" },
+      { icon: Package, label: "Produtos", path: "/products" },
+      { icon: Tag, label: "Categorias", path: "/categories" },
+      { icon: Users, label: "Clientes", path: "/clients" },
+      { icon: FileText, label: "Vendas", path: "/sales" },
+      { icon: DollarSign, label: "Caixa", path: "/cashier" },
+      { icon: BarChart3, label: "Financeiro", path: "/finance" },
+
+      { icon: CalendarDays, label: "Agenda", path: "/agenda" },
+      { icon: Percent, label: "Promoções", path: "/promotions" },
+      { icon: Lightbulb, label: "Estratégia", path: "/strategy" },
+
+      { icon: Store, label: "Lojas", path: "/store" },
+      { icon: Settings, label: "Configurações", path: "/settings" },
+    ],
+    []
+  );
+
   return (
-    <div className="w-56 h-screen bg-linear-to-b from-emerald-500 to-emerald-600 text-white flex flex-col fixed left-0 top-0">
+    <aside
+      className={[
+        "h-dvh shrink-0",
+        "bg-linear-to-b from-emerald-500 to-emerald-600 text-white",
+        "flex flex-col",
+        "transition-[width] duration-200",
+        collapsed ? "w-18" : "w-56",
+      ].join(" ")}
+    >
       {/* Logo */}
-      <div className="h-24 flex flex-col justify-center px-6 border-b border-emerald-400">
-        <h1 className="text-2xl font-bold">Next Flow PDV</h1>
-        <p className="text-emerald-100 text-xs mt-1">Sistema de Gerenciamento</p>
+      <div
+        className={[
+          "border-b border-emerald-400",
+          "px-4",
+          "h-24 flex items-center",
+          collapsed ? "justify-center" : "justify-start",
+        ].join(" ")}
+      >
+        {collapsed ? (
+          <div className="h-10 w-10 rounded-xl bg-emerald-400/40 flex items-center justify-center font-bold">
+            NF
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold leading-none">Next Flow PDV</h1>
+            <p className="text-emerald-100 text-xs mt-1">
+              Sistema de Gerenciamento
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Navegação */}
-      <nav className="flex-1 py-4 overflow-y-auto">
+      <nav className="flex-1 py-3 overflow-y-auto">
         {menuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            className={({ isActive }) => {
-              const base =
-                "w-full flex items-center gap-3 px-6 py-3 transition-all cursor-pointer text-emerald-50 hover:bg-emerald-400 hover:bg-opacity-20";
-              const active = "bg-emerald-600 bg-opacity-40";
-              return `${base} ${isActive ? active : ""}`;
-            }}
+            title={collapsed ? item.label : undefined}
+            className={({ isActive }) =>
+              [
+                "mx-2 my-1 rounded-xl transition-all",
+                "flex items-center gap-3",
+                collapsed ? "justify-center px-0 py-3" : "px-4 py-3",
+                "hover:bg-emerald-400/20 text-emerald-50",
+                isActive ? "bg-emerald-900/20" : "",
+              ].join(" ")
+            }
           >
             <item.icon size={20} />
-            <span className="font-medium">{item.label}</span>
+            {!collapsed && <span className="font-medium">{item.label}</span>}
           </NavLink>
         ))}
       </nav>
 
-      {/* Sair */}
-      <div className="p-4 border-t border-emerald-400">
+      {/* Recolher + Sair */}
+      <div className="p-3 border-t border-emerald-400 space-y-2">
+        <button
+          type="button"
+          onClick={() => setCollapsed((v) => !v)}
+          className={[
+            "w-full rounded-lg transition-all duration-200",
+            "bg-emerald-400/30 hover:bg-emerald-400/45",
+            "flex items-center gap-3",
+            collapsed ? "justify-center px-0 py-3" : "justify-center px-4 py-3",
+          ].join(" ")}
+          aria-label={collapsed ? "Expandir" : "Recolher"}
+          title={collapsed ? "Expandir" : "Recolher"}
+        >
+          {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          {!collapsed && <span className="font-medium">Recolher</span>}
+        </button>
+
         <button
           onClick={logout}
-          className="w-full flex items-center justify-center gap-3 px-6 py-3 cursor-pointer bg-emerald-400 bg-opacity-50 rounded-lg transition-all duration-300 hover:bg-opacity-70"
+          className={[
+            "w-full rounded-lg transition-all duration-200",
+            "bg-emerald-400/50 hover:bg-emerald-400/70",
+            "flex items-center gap-3",
+            collapsed ? "justify-center px-0 py-3" : "justify-center px-4 py-3",
+          ].join(" ")}
+          title={collapsed ? "Sair" : undefined}
         >
           <LogOut size={20} />
-          <span className="font-medium">Sair</span>
+          {!collapsed && <span className="font-medium">Sair</span>}
         </button>
       </div>
-    </div>
+    </aside>
   );
 }
