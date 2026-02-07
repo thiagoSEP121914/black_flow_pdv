@@ -14,7 +14,8 @@
         "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
         "test:watch": "npm run test -- --watch",
         "test:coverage": "npm run test -- --coverage",
-        "test:int": "cross-env NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test -- jest -i --testMatch '**/*.int.spec.ts'"
+        "test:int": "cross-env NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test -- jest -i --testMatch '**/*.int.spec.ts'",
+        "test:unit": "cross-env NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test -- jest --testMatch '**/*.unit.spec.ts'"
     },
     "keywords": [],
     "author": "",
