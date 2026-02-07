@@ -1,4 +1,4 @@
-
+/// <reference types="node" />
 import { execSync } from 'child_process';
 import net from 'net';
 
@@ -41,8 +41,21 @@ const waitForPort = (port: number, host: string = 'localhost', timeout: number =
     });
 };
 
+const isIntegrationTest = (): boolean => {
+    // Verifica se está rodando testes de integração
+    const testMatch = process.argv.find((arg: string) => arg.includes('int.spec'));
+    const envFlag = process.env.INTEGRATION_TEST === 'true';
+    return !!testMatch || envFlag;
+};
+
 export default async () => {
-    console.log('\n🚀 Starting Test Environment...');
+    // Só sobe Docker para testes de integração
+    if (!isIntegrationTest()) {
+        console.log('\n🧪 Running unit tests (no Docker needed)');
+        return;
+    }
+
+    console.log('\n🚀 Starting Integration Test Environment...');
 
     try {
         execSync('docker compose -f docker-compose.test.yml up -d', { stdio: 'inherit' });
