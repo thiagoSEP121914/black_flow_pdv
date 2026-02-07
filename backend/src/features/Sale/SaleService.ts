@@ -168,7 +168,7 @@ export class SaleService {
             }
 
             if (!product.active) {
-                throw new Error(`Product is not active: ${product.name}`);
+                throw new Error(`Product ${product.name} is not active`);
             }
 
             if (product.quantity < item.quantity) {
