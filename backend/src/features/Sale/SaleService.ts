@@ -66,37 +66,13 @@ export class SaleService {
 
         const store = await this.storeService.findStoreById(ctx, storeId);
         if (!store) throw new NotFoundError("Store not found");
-        if (store.companyId !== ctx.companyId) {
-            throw new NotFoundError("Store not found");
-        }
 
-        const saleItems: CreateSaleData["items"] = [];
-        let total = 0;
+        const productIds = items.map((i) => i.productId);
+        const products = await this.productService.findByIds(ctx, productIds);
 
-        for (const item of items) {
-            const product = await this.productService.findById(ctx, item.productId);
-
-            if (!product.active) {
-                throw new Error(`Product ${product.name} is not active`);
-            }
-
-            if (product.quantity < item.quantity) {
-                throw new Error(`Insufficient stock for product ${product.name}. Available: ${product.quantity}, Requested: ${item.quantity}`);
-            }
-
-            const subtotal = product.salePrice * item.quantity;
-            total += subtotal;
-
-            saleItems.push({
-                productId: item.productId,
-                quantity: item.quantity,
-                unitPrice: product.salePrice,
-                subtotal,
-            });
-        }
+        const { saleItems, total } = this.processSaleItems(items, products);
 
         const finalTotal = total - (discount ?? 0);
-
         if (finalTotal < 0) {
             throw new Error("Discount cannot exceed total value");
         }
@@ -179,5 +155,42 @@ export class SaleService {
             status,
             companyId: ctx.companyId,
         });
+    }
+
+    private processSaleItems(dtoItems: CreateSaleItemDTO[], dbProducts: { id: string; name: string; active: boolean; salePrice: number; quantity: number }[]) {
+        let total = 0;
+        const productMap = new Map(dbProducts.map((product) => [product.id, product]));
+
+        const saleItems = dtoItems.map((item) => {
+            const product = productMap.get(item.productId);
+            if (!product) {
+                throw new Error(`Product not found: ${item.productId}`);
+            }
+
+            if (!product.active) {
+                throw new Error(`Product is not active: ${product.name}`);
+            }
+
+            if (product.quantity < item.quantity) {
+                throw new Error(
+                    `Insufficient stock for product ${product.name}. Available: ${product.quantity}, Requested: ${item.quantity}`,
+                );
+            }
+
+            const subtotal = this.calculateSubtotal(item.quantity, product.salePrice);
+            total += subtotal;
+            return {
+                productId: item.productId,
+                quantity: item.quantity,
+                unitPrice: product.salePrice,
+                subtotal,
+            };
+        });
+
+        return { saleItems, total };
+    }
+
+    private calculateSubtotal(quantity: number, unitPrice: number): number {
+        return quantity * unitPrice;
     }
 }
