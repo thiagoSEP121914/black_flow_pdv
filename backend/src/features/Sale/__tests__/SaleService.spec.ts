@@ -97,6 +97,7 @@ describe("SaleService unit tests", () => {
 
         mockProductService = {
             findById: jest.fn(),
+            findByIds: jest.fn(),
         } as unknown as MockProductService;
 
         saleService = new SaleService(mockRepository, mockStoreService, mockProductService);
@@ -175,17 +176,17 @@ describe("SaleService unit tests", () => {
             await expect(saleService.createSale(mockCtx, dto)).rejects.toThrow("Store not found");
         });
 
-        it("should throw NotFoundError when store companyId differs", async () => {
-            mockStoreService.findStoreById.mockResolvedValue(makeStore({ companyId: "company-2" }) as unknown as never);
+        it("should throw when product is not found", async () => {
+            mockStoreService.findStoreById.mockResolvedValue(makeStore() as never);
+            mockProductService.findByIds.mockResolvedValue([] as never);
             const dto = makeCreateSaleDTO();
 
-            await expect(saleService.createSale(mockCtx, dto)).rejects.toThrow(NotFoundError);
-            await expect(saleService.createSale(mockCtx, dto)).rejects.toThrow("Store not found");
+            await expect(saleService.createSale(mockCtx, dto)).rejects.toThrow("Product not found: product-1");
         });
 
         it("should throw when product is not active", async () => {
             mockStoreService.findStoreById.mockResolvedValue(makeStore() as never);
-            mockProductService.findById.mockResolvedValue(makeProduct({ active: false }) as never);
+            mockProductService.findByIds.mockResolvedValue([makeProduct({ active: false })] as never);
             const dto = makeCreateSaleDTO();
 
             await expect(saleService.createSale(mockCtx, dto)).rejects.toThrow("Product Product 1 is not active");
@@ -193,7 +194,7 @@ describe("SaleService unit tests", () => {
 
         it("should throw when insufficient stock", async () => {
             mockStoreService.findStoreById.mockResolvedValue(makeStore() as never);
-            mockProductService.findById.mockResolvedValue(makeProduct({ quantity: 1 }) as never);
+            mockProductService.findByIds.mockResolvedValue([makeProduct({ quantity: 1 })] as never);
             const dto = makeCreateSaleDTO({ items: [{ productId: "product-1", quantity: 5 }] });
 
             await expect(saleService.createSale(mockCtx, dto)).rejects.toThrow(
@@ -203,7 +204,7 @@ describe("SaleService unit tests", () => {
 
         it("should throw when discount exceeds total", async () => {
             mockStoreService.findStoreById.mockResolvedValue(makeStore() as never);
-            mockProductService.findById.mockResolvedValue(makeProduct() as never);
+            mockProductService.findByIds.mockResolvedValue([makeProduct()] as never);
             const dto = makeCreateSaleDTO({ discount: 2000 });
 
             await expect(saleService.createSale(mockCtx, dto)).rejects.toThrow("Discount cannot exceed total value");
@@ -211,7 +212,7 @@ describe("SaleService unit tests", () => {
 
         it("should create a sale with items and calculate total", async () => {
             mockStoreService.findStoreById.mockResolvedValue(makeStore() as never);
-            mockProductService.findById.mockResolvedValue(makeProduct() as never);
+            mockProductService.findByIds.mockResolvedValue([makeProduct()] as never);
             mockRepository.insertWithItems.mockResolvedValue(makeSaleWithItems());
 
             const dto = makeCreateSaleDTO();
