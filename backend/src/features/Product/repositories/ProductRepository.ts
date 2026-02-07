@@ -83,6 +83,12 @@ export class ProductRepositoryImpl implements IProductRepository {
         });
     }
 
+    async findByIds(ids: string[]): Promise<Product[]> {
+        return await this.prisma.product.findMany({
+            where: { id: { in: ids } },
+        });
+    }
+
     private buildWhereClause(filter?: string | null): any {
         if (!filter) return {};
 

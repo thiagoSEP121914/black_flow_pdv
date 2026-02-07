@@ -113,4 +113,9 @@ export class ProductService {
 
         return product;
     }
+
+    async findByIds(ctx: UserContext, ids: string[]): Promise<Product[]> {
+        const products = await this.productRepository.findByIds(ids);
+        return products.filter((p) => p.companyId === ctx.companyId);
+    }
 }
